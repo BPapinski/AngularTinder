@@ -4,6 +4,11 @@ Thumbs.db
 .idea/
 *.log
 
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
+
 
 postgres_data/
 db_data/
