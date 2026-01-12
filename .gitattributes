@@ -1,0 +1,3 @@
+# Wymuś styl Linuxowy dla plików definicji pakietów
+**/package.json text eol=lf
+**/package-lock.json text eol=lf

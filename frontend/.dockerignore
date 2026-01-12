@@ -1,0 +1,14 @@
+node_modules
+.angular
+dist
+
+.git
+.vscode
+.idea
+.gitignore
+
+*.log
+.DS_Store
+Thumbs.db
+
+README.md
