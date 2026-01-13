@@ -109,3 +109,12 @@ Zrestartuj frontend, jeśli konieczne.
 docker-compose up -d --build backend
 ```
 3. **Docker na Windows działa wolno** – upewnij się, że projekt znajduje się w systemie plików WSL (`\\wsl$\Ubuntu\home\...`), nie na dysku C:.
+
+
+## 🔑 Logowanie
+
+> Logowanie odbywa się po **emailu**.
+
+| Email            | Hasło |
+|-----------------|-------|
+| admin@admin.com  | admin |
