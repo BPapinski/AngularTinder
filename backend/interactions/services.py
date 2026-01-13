@@ -14,7 +14,6 @@ def perform_like(sender, receiver):
 
     is_match = False
     
-    # 2. Sprawdź czy druga strona też dała like
     has_liked_back = Interaction.objects.filter(
         user=receiver,
         target_user=sender,
@@ -22,8 +21,6 @@ def perform_like(sender, receiver):
     ).exists()
 
     if has_liked_back:
-        # 3. Sprawdź czy match już istnieje (zabezpieczenie)
-        # Sortujemy ID, aby uniknąć duplikatów (A-B i B-A to ten sam match)
         u1, u2 = sorted([sender, receiver], key=lambda u: u.pk)
         
         match, match_created = Match.objects.get_or_create(
@@ -37,6 +34,14 @@ def perform_like(sender, receiver):
 
     return is_match
 
+
+# do wykonania "dislike"
+def perform_dislike(sender, receiver):
+    Interaction.objects.update_or_create(
+        user=sender,
+        target_user=receiver,
+        defaults={'action': Interaction.DISLIKE}
+    )
 
 # Zwraca profile z którymi użytkownik nie miał jeszcze interakcji -> do wyswietlenia w feedzie
 

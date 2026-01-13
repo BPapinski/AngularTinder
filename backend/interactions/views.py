@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status, permissions
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
-from .services import perform_like
+from .services import perform_like, perform_dislike
 
 User = get_user_model()
 
@@ -23,3 +23,22 @@ class LikeUserView(APIView):
             "is_match": is_match
         }, status=status.HTTP_200_OK)
     
+
+class DislikeUserView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, user_id):
+        target_user = get_object_or_404(User, pk=user_id)
+        
+        if target_user == request.user:
+            return Response(
+                {"error": "You cannot reject yourself"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        perform_dislike(request.user, target_user)
+
+        return Response({
+            "status": "rejected",
+            "message": "User has been skipped."
+        }, status=status.HTTP_200_OK)
