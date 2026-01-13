@@ -61,11 +61,12 @@ docker-compose exec backend python manage.py createsuperuser
 
 ## 🌍 Dostęp do aplikacji
 
-| Serwis       | URL                       | Opis                       |
-|-------------|----------------------------|----------------------------|
-| Frontend     | http://localhost:4200      | Aplikacja Angular          |
-| Backend API  | http://localhost:8000/api/ | Django REST Framework      |
-| Admin Panel  | http://localhost:8000/admin| Django Admin               |
+| Komponent | Adres URL | Opis |
+| :--- | :--- | :--- |
+| **Frontend** | [http://localhost:4200](http://localhost:4200) | Klient webowy (Angular) |
+| **Backend API** | [http://localhost:8000/api/](http://localhost:8000/api/) | Główny punkt wejścia API (DRF) |
+| **Admin Panel** | [http://localhost:8000/admin](http://localhost:8000/admin) | Panel administracyjny Django |
+| **Dokumentacja** | [http://localhost:8000/api/docs/](http://localhost:8000/api/docs/) | Swagger UI (testowanie endpointów) |
 
 ---
 

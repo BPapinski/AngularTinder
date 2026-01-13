@@ -1,0 +1,25 @@
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status, permissions
+from django.shortcuts import get_object_or_404
+from django.contrib.auth import get_user_model
+from .services import perform_like
+
+User = get_user_model()
+
+class LikeUserView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, user_id):
+        target_user = get_object_or_404(User, pk=user_id)
+        
+        if target_user == request.user:
+            return Response({"error": "You cannot like yourself"}, status=400)
+
+        is_match = perform_like(request.user, target_user)
+
+        return Response({
+            "status": "liked",
+            "is_match": is_match
+        }, status=status.HTTP_200_OK)
+    
