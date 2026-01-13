@@ -1,7 +1,8 @@
-from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from rest_framework import serializers
 
 User = get_user_model()
+
 
 class DatingCardSerializer(serializers.ModelSerializer):
     # Wiek bierzemy z property 'age' z modelu User
@@ -9,4 +10,4 @@ class DatingCardSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'first_name', 'age', 'gender', 'bio', 'profile_image']
+        fields = ["id", "first_name", "age", "gender", "bio", "profile_image"]

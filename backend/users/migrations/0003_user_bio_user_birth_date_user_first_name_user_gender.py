@@ -4,30 +4,31 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('users', '0002_user_profile_image'),
+        ("users", "0002_user_profile_image"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='user',
-            name='bio',
+            model_name="user",
+            name="bio",
             field=models.TextField(blank=True, max_length=500),
         ),
         migrations.AddField(
-            model_name='user',
-            name='birth_date',
+            model_name="user",
+            name="birth_date",
             field=models.DateField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='user',
-            name='first_name',
+            model_name="user",
+            name="first_name",
             field=models.CharField(blank=True, max_length=50),
         ),
         migrations.AddField(
-            model_name='user',
-            name='gender',
-            field=models.CharField(choices=[('M', 'Mężczyzna'), ('F', 'Kobieta'), ('O', 'Inna')], default='M', max_length=1),
+            model_name="user",
+            name="gender",
+            field=models.CharField(
+                choices=[("M", "Mężczyzna"), ("F", "Kobieta"), ("O", "Inna")], default="M", max_length=1
+            ),
         ),
     ]
