@@ -43,7 +43,9 @@ def perform_dislike(sender, receiver):
         defaults={'action': Interaction.DISLIKE}
     )
 
-# Zwraca profile z którymi użytkownik nie miał jeszcze interakcji -> do wyswietlenia w feedzie
+
+
+# Funkcja do pobierania feedu randkowego
 
 def get_dating_feed(user):
     interacted_users_ids = Interaction.objects.filter(
