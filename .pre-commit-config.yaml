@@ -18,8 +18,14 @@ repos:
     rev: v1.8.0
     hooks:
       - id: mypy
+        args: [--config-file=pyproject.toml]
         additional_dependencies: [
-            'django-stubs',
-            'djangorestframework-stubs',
-            'types-requests'
+            'django-stubs==4.2.7',
+            'djangorestframework-stubs==3.14.5',
+            'types-requests',
+            'django-jazzmin',
+            'drf-spectacular',
+            'djangorestframework-simplejwt',
+            'django-cors-headers',
+            'Pillow'
         ]

@@ -1,0 +1,26 @@
+<div class="login-container">
+  <h2>Zaloguj się</h2>
+
+  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+
+    <div>
+      <label for="email">Email:</label>
+      <input id="email" type="email" formControlName="email">
+    </div>
+
+    <div>
+      <label for="password">Hasło:</label>
+      <input id="password" type="password" formControlName="password">
+    </div>
+
+    <div *ngIf="errorMessage()" style="color: red;">
+        {{ errorMessage() }}
+    </div>
+
+    <button type="submit" [disabled]="loginForm.invalid" style="margin-top: 10px;">
+      Zaloguj
+    </button>
+  </form>
+</div>
+
+/* tu mozna wszystko wyjebac i zmienic, to jest tylko dla testu jak cos */
