@@ -4,11 +4,11 @@ Projekt aplikacji randkowej (klon Tindera) oparty na architekturze mikroserwisow
 
 ## 🛠 Tech Stack
 
-- **Backend:** Django 5, Django REST Framework (Python 3.12)  
-- **Frontend:** Angular 17+ (Node.js 20)  
-- **Database:** PostgreSQL (uruchamiana w Dockerze)  
-- **DevOps:** Docker, Docker Compose  
-- **Code Quality:** Ruff (Linter/Formatter), Pre-commit hooks  
+- **Backend:** Django 5, Django REST Framework (Python 3.12)
+- **Frontend:** Angular 17+ (Node.js 20)
+- **Database:** PostgreSQL (uruchamiana w Dockerze)
+- **DevOps:** Docker, Docker Compose
+- **Code Quality:** Ruff (Linter/Formatter), Pre-commit hooks
 
 ---
 
@@ -16,12 +16,12 @@ Projekt aplikacji randkowej (klon Tindera) oparty na architekturze mikroserwisow
 
 Przed uruchomieniem projektu upewnij się, że masz zainstalowane:
 
-1. **[Docker Desktop](https://www.docker.com/products/docker-desktop/)**  
-   - Uruchamia całą aplikację (backend + frontend + baza).  
-   - *Windows:* Włącz "Use the WSL 2 based engine".  
+1. **[Docker Desktop](https://www.docker.com/products/docker-desktop/)**
+   - Uruchamia całą aplikację (backend + frontend + baza).
+   - *Windows:* Włącz "Use the WSL 2 based engine".
 
-2. **[Git](https://git-scm.com/downloads)** – do pobierania kodu i wersjonowania.  
-3. **[Python 3.10+](https://www.python.org/downloads/)** – potrzebny lokalnie do `pre-commit`.  
+2. **[Git](https://git-scm.com/downloads)** – do pobierania kodu i wersjonowania.
+3. **[Python 3.10+](https://www.python.org/downloads/)** – potrzebny lokalnie do `pre-commit`.
 4. **[VS Code](https://code.visualstudio.com/)** – zalecany edytor, z wtyczką **Ruff** do automatycznego formatowania kodu.
 
 ---
@@ -85,26 +85,59 @@ docker-compose exec backend ruff format .
 docker-compose exec backend ruff check --fix .
 ```
 
-### Instalacja nowych bibliotek
+## 📦 Dodawanie nowych bibliotek (Docker Workflow)
 
-**Backend (Python):**
-1. Dodaj bibliotekę do `backend/requirements.txt`.
-2. Przebuduj kontener:
+### 🐍 Backend (Django / Python)
+
+Instalacja biblioteki w działającym kontenerze:
 ```bash
-docker-compose up -d --build backend
+docker-compose exec backend pip install <nazwa-biblioteki>
+# np.
+docker-compose exec backend pip install django-jazzmin
 ```
 
-**Frontend (Angular):**
+Zapisanie wersji do pliku `requirements.txt`:
 ```bash
-docker-compose run --rm frontend npm install <nazwa-biblioteki>
+docker-compose exec backend pip freeze > ./backend/requirements.txt
 ```
-Zrestartuj frontend, jeśli konieczne.
+
+- biblioteka działa od razu, bez restartu ani rebuilda
+- `pip freeze` nadpisuje lokalny `requirements.txt` aktualnymi wersjami z kontenera
+- przy kolejnym `docker-compose build` biblioteka zostanie zainstalowana automatycznie
+
+---
+
+### 🅰️ Frontend (Angular / Node)
+
+Instalacja biblioteki:
+```bash
+docker-compose exec frontend npm install <nazwa-biblioteki>
+# np.
+docker-compose exec frontend npm install moment
+```
+
+- `npm install` automatycznie aktualizuje `package.json` i `package-lock.json`
+- pliki są zapisane lokalnie dzięki volumes
+
+Opcjonalny restart, jeśli Angular nie wykryje zmian:
+```bash
+docker-compose restart frontend
+```
+
+---
+
+### ⚠️ Ważne
+
+- po `docker-compose down` wszystkie biblioteki zainstalowane **bez zapisu** znikną
+- zawsze upewnij się, że:
+  - backend: `requirements.txt` został zaktualizowany
+  - frontend: `package.json` / `package-lock.json` zostały zapisane
 
 ---
 
 ## ❓ Troubleshooting
 
-1. **git commit odrzuca zmiany** – pre-commit poprawił błędy. Dodaj pliki ponownie (`git add .`) i spróbuj commitować.  
+1. **git commit odrzuca zmiany** – pre-commit poprawił błędy. Dodaj pliki ponownie (`git add .`) i spróbuj commitować.
 2. **Błąd: exec: "ruff": executable file not found** – przebuduj backend:
 ```bash
 docker-compose up -d --build backend

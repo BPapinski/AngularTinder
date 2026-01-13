@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -20,7 +21,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-on(ckf@vx-$s7#nfvu)105s+4*$&&6*8)&cfapzp5_*+s54&0r"
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+if not SECRET_KEY:
+    # local/dev fallback only — never ship this to production
+    from django.core.management.utils import get_random_secret_key
+
+    SECRET_KEY = get_random_secret_key()
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -31,6 +38,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -38,10 +46,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-
     "users",
     "interactions",
-
     "rest_framework_simplejwt",
     "drf_spectacular",
 ]
@@ -72,16 +78,6 @@ TEMPLATES = [
         },
     },
 ]
-
-
-
-
-
-
-
-
-
-
 
 
 WSGI_APPLICATION = "config.wsgi.application"
@@ -117,19 +113,17 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
-    ),
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    "DEFAULT_AUTHENTICATION_CLASSES": ("rest_framework_simplejwt.authentication.JWTAuthentication",),
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'Your Project API',
-    'DESCRIPTION': 'Your project description',
-    'VERSION': '1.0.0',
-    'SERVE_INCLUDE_SCHEMA': False,
+    "TITLE": "Your Project API",
+    "DESCRIPTION": "Your project description",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
     # OTHER SETTINGS
-    'COMPONENT_SPLIT_REQUEST': True
+    "COMPONENT_SPLIT_REQUEST": True,
 }
 
 
@@ -152,5 +146,34 @@ STATIC_URL = "static/"
 
 AUTH_USER_MODEL = "users.User"
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+JAZZMIN_SETTINGS = {
+    # Tytuł w oknie przeglądarki
+    "site_title": "Dating App Admin",
+    # Tytuł na ekranie logowania
+    "site_header": "Dating App",
+    # Logo (musi być w folderze static)
+    # "site_logo": "img/logo.png",
+    # Tekst powitalny na ekranie logowania
+    "welcome_sign": "Witaj w panelu zarządzania aplikacją randkową",
+    # Prawa autorskie na dole
+    "copyright": "Twoja Firma Ltd",
+    # Czy pokazywać model User w menu (często się przydaje)
+    "search_model": "users.User",
+    # Menu boczne (możesz grupować aplikacje)
+    "order_with_respect_to": ["users", "interactions"],
+    # Ikony dla konkretnych modeli (używa FontAwesome)
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "users.user": "fas fa-user",
+        "interactions.interaction": "fas fa-heart",
+        "interactions.match": "fas fa-handshake",
+    },
+}
+
+
+JAZZMIN_UI_TWEAKS = {
+    "show_ui_builder": True,
+}

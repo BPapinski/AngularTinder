@@ -1,0 +1,16 @@
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+select = [
+    "E",
+    "F",
+    "W",
+    "C90",
+    "B",
+    "S",
+]
+[tool.ruff.lint]
+ignore = ["E402"]
+
+[tool.ruff.lint.extend-per-file-ignores]
+"**/migrations/*.py" = ["E501"]
