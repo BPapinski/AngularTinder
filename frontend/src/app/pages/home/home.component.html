@@ -1,0 +1,12 @@
+<div class="home-container">
+  <h1>Strona główna</h1>
+
+  <ng-container *ngIf="authService.isLoggedIn(); else loginButton">
+    <p>Jesteś zalogowany</p>
+    <button (click)="logout()">Wyloguj się</button>
+  </ng-container>
+
+  <ng-template #loginButton>
+    <button (click)="login()">Zaloguj się</button>
+  </ng-template>
+</div>
