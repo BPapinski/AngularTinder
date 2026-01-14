@@ -129,7 +129,7 @@ SPECTACULAR_SETTINGS = {
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(seconds=10),  # krotszy czas życia tokenu dostępu dla testów
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=10),  # krotszy czas życia tokenu dostępu dla testów
 }
 
 LANGUAGE_CODE = "en-us"

@@ -13,10 +13,29 @@ class User(AbstractBaseUser, PermissionsMixin):
         FEMALE = "F", _("Kobieta")
         OTHER = "O", _("Inna")
 
+    class GenderPreference(models.TextChoices):
+        MALE = "M", _("Mężczyzna")
+        FEMALE = "F", _("Kobieta")
+        ANY = "A", _("Dowolna")
+
     email = models.EmailField(unique=True)
     first_name = models.CharField(max_length=50, blank=True)
 
     gender = models.CharField(max_length=1, choices=Gender.choices, default=Gender.MALE)
+    gender_preference = models.CharField(max_length=1, choices=GenderPreference.choices, default=GenderPreference.ANY)
+
+    min_preferred_age = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        help_text="Minimalny wiek partnera",
+    )
+
+    max_preferred_age = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        help_text="Maksymalny wiek partnera",
+    )
+
     birth_date = models.DateField(null=True, blank=True)
     bio = models.TextField(max_length=500, blank=True)
 
