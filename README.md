@@ -134,6 +134,15 @@ docker-compose restart frontend
   - frontend: `package.json` / `package-lock.json` zostały zapisane
 
 ---
+### Tworzenie nowego komponentu
+
+- docker-compose exec frontend npx ng generate component pages/nazwa-komponentu
+
+- przykład - docker-compose exec frontend npx ng generate component pages/home
+
+- jesli by tworzylo pliki np home.html zamiast home.component.html to zmień ręcznie żeby nie spierdolić nazwenictwa
+
+---
 
 ## ❓ Troubleshooting
 

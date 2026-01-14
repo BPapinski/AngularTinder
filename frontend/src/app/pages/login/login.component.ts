@@ -34,9 +34,8 @@ export class LoginComponent {
       this.authService.login(credentials).subscribe({
         next: () => {
           console.log('logged in successfully');
-          window.alert('logged in');
           this.errorMessage.set('');
-          // this.router.navigate(['/feed']);   // tutaj przekierowanie po zalogowaniu na strone glowna
+          this.router.navigate(['/']);
         },
         error: (err: any) => {
           console.error('log in error ', err);
