@@ -21,6 +21,15 @@
       Zaloguj
     </button>
   </form>
+
+  <hr />
+
+  <button (click)="callProtected()">
+    Call protected endpoint
+  </button>
+
+  <pre>{{ protectedResponse() }}</pre>
+
 </div>
 
 /* tu mozna wszystko wyjebac i zmienic, to jest tylko dla testu jak cos */

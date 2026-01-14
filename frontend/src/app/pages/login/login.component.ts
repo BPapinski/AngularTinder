@@ -38,11 +38,28 @@ export class LoginComponent {
           this.errorMessage.set('');
           // this.router.navigate(['/feed']);   // tutaj przekierowanie po zalogowaniu na strone glowna
         },
-        error: (err) => {
+        error: (err: any) => {
           console.error('log in error ', err);
           this.errorMessage.set('invalid credentials');
         }
       });
     }
+  }
+
+
+  protectedResponse = signal<string>('');
+
+  callProtected() {
+    this.authService
+      .authFetch<any>('http://localhost:8000/api/users/protected-test/')
+      .subscribe({
+        next: (res: any) => {
+          this.protectedResponse.set(JSON.stringify(res, null, 2));
+        },
+        error: (err: any) => {
+          console.error(err);
+          this.protectedResponse.set('Authorization failed');
+        }
+      });
   }
 }
