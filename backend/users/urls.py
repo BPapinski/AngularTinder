@@ -10,4 +10,5 @@ urlpatterns = [
     path("token/verify/", TokenVerifyView.as_view()),
     path("protected-test/", ProtectedTestView.as_view()),
     path("me/", UserProfileView.as_view(), name="user-profile"),
+    path("<int:user_id>/", UserProfileView.as_view(), name="user-profile-detail"),
 ]

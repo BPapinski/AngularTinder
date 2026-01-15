@@ -6,4 +6,5 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: '', component: HomeComponent },
   {path: 'profile', component: UserProfile},
+  { path: 'profile/:id', component: UserProfile },
 ];

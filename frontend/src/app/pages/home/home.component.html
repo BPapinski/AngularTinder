@@ -23,7 +23,11 @@
           {{ p.first_name.charAt(0) }}
         </div>
 
-        <h3>{{ p.first_name }} ({{ p.age }})</h3>
+        <h3>
+          <a [routerLink]="['/profile', p.id]">
+            {{ p.first_name }} ({{ p.age }})
+          </a>
+        </h3>
         <p>{{ p.bio }}</p>
 
         <!-- Przycisk Smash/Pass -->

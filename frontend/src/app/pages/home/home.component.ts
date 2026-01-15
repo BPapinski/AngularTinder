@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core'; // 1. Import
-import { Router } from '@angular/router';
+import { Router, RouterModule  } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
 import { DatingService, DatingProfile } from '../../services/dating.service';
@@ -7,7 +7,7 @@ import { DatingService, DatingProfile } from '../../services/dating.service';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css'],
 })
