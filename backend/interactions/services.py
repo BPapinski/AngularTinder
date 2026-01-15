@@ -44,8 +44,8 @@ def get_dating_feed(user):
     profiles = User.objects.exclude(id__in=interacted_users_ids).exclude(id=user.id)
 
     # filtr płci
-    if user.preferred_gender != User.GenderPreference.ANY:
-        profiles = profiles.filter(gender=user.preferred_gender)
+    if user.gender_preference != User.GenderPreference.ANY:
+        profiles = profiles.filter(gender=user.gender_preference)
 
     # filtr wieku
     today = date.today()

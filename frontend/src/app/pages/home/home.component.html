@@ -2,8 +2,29 @@
   <h1>Strona główna</h1>
 
   <ng-container *ngIf="authService.isLoggedIn(); else loginButton">
-    <p>Jesteś zalogowany</p>
-    <button (click)="logout()">Wyloguj się</button>
+    <div class="header-actions">
+      <p>Jesteś zalogowany</p>
+      <button (click)="logout()">Wyloguj się</button>
+    </div>
+
+    <p *ngIf="loading">Ładowanie feedu...</p>
+
+    <div *ngIf="!loading && profiles.length === 0">
+       Brak osób w Twojej okolicy.
+    </div>
+
+    <div class="profiles">
+      <div class="profile-card" *ngFor="let p of profiles">
+
+        <img *ngIf="p.profile_image" [src]="p.profile_image" alt="Zdjęcie profilowe" />
+
+        <div *ngIf="!p.profile_image" class="placeholder-img">
+          {{ p.first_name.charAt(0) }} </div>
+
+        <h3>{{ p.first_name }} ({{ p.age }})</h3>
+        <p>{{ p.bio }}</p>
+      </div>
+    </div>
   </ng-container>
 
   <ng-template #loginButton>
