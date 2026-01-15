@@ -60,4 +60,14 @@ export class HomeComponent implements OnInit {
     this.authService.logout();
     this.router.navigate(['/login']);
   }
+
+  pass(profile: any) {
+    console.log('Pass clicked for', profile);
+    // Tutaj wywołanie API do backendu, np. oznaczenie profilu jako "przesunięty w lewo"
+  }
+
+  smash(profile: any) {
+    console.log('Smash clicked for', profile);
+    // Tutaj wywołanie API do backendu, np. oznaczenie profilu jako "polubiony"
+  }
 }

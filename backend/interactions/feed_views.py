@@ -23,6 +23,6 @@ class DatingFeedView(APIView):
         if not candidates_batch:
             return Response({"message": "No more profiles available."}, status=status.HTTP_200_OK)
 
-        serializer = DatingCardSerializer(candidates_batch, many=True)
+        serializer = DatingCardSerializer(candidates_batch, many=True, context={"request": request})
 
         return Response(serializer.data, status=status.HTTP_200_OK)

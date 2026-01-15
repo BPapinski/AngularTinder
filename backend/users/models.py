@@ -7,6 +7,11 @@ from django.utils.translation import gettext_lazy as _
 from .managers import UserManager
 
 
+def user_directory_path(instance, filename):
+    # Plik zapisany w: MEDIA_ROOT/profile_images/<user_id>/<filename>
+    return f"profile_images/user_{instance.id}/{filename}"
+
+
 class User(AbstractBaseUser, PermissionsMixin):
     class Gender(models.TextChoices):
         MALE = "M", _("Mężczyzna")
@@ -43,7 +48,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     profile_image = models.ImageField(
-        upload_to="profile_images/",  # folder w MEDIA_ROOT
+        upload_to=user_directory_path,
         null=True,
         blank=True,
     )
