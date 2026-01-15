@@ -12,11 +12,9 @@ export interface DatingProfile {
 
 @Injectable({ providedIn: 'root' })
 export class DatingService {
-  private feedUrl = 'http://localhost:8000/api/interactions/feed/';
-
   constructor(private auth: AuthService) {}
 
   getFeed() {
-    return this.auth.authFetch<DatingProfile[]>(this.feedUrl);
+    return this.auth.authFetch<DatingProfile[]>('/interactions/feed/');
   }
 }

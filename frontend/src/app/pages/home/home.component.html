@@ -1,6 +1,7 @@
 <div class="home-container">
   <h1>Strona główna</h1>
 
+  <!-- jesli zalogowany -->
   <ng-container *ngIf="authService.isLoggedIn(); else loginButton">
     <div class="header-actions">
       <p>Jesteś zalogowany</p>
@@ -35,11 +36,15 @@
     </div>
   </ng-container>
 
+  <!-- jesli niezalogowany -->
   <ng-template #loginButton>
     <button (click)="login()">Zaloguj się</button>
   </ng-template>
 </div>
 
+
+
+<!-- style sa tu na chwile poki nie ma innego layoutu -->
 <style>
 .home-container {
   max-width: 1000px;
