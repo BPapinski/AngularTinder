@@ -29,3 +29,21 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    age = serializers.ReadOnlyField()
+
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "email",
+            "first_name",
+            "gender",
+            "birth_date",
+            "age",
+            "bio",
+            "profile_image",
+            "created_at",
+        ]
