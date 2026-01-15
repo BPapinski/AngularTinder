@@ -52,9 +52,13 @@ Otwórz nowe okno terminala i wykonaj migracje Django:
 ```bash
 docker-compose exec backend python manage.py migrate
 ```
-Opcjonalnie stwórz konto administratora:
+Stwórz konto administratora:
 ```bash
 docker-compose exec backend python manage.py createsuperuser
+
+Wskazówka: Formularz logowania posiada domyślne autouzupełnianie dla poniższych danych, co przyspiesza testowanie:
+Email: admin@admin.com
+Hasło: admin
 ```
 
 ---
