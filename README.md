@@ -82,7 +82,7 @@ docker-compose up
 docker-compose up -d
 ```
 
-### Formatowanie kodu
+### Formatowanie kodu - powinno tez robic sie automatycznie dzieki pre-commit
 ```bash
 docker-compose exec backend ruff format .
 docker-compose exec backend ruff check --fix .
