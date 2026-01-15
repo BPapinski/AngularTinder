@@ -1,18 +1,14 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders  } from '@angular/common/http';
-import { Observable, tap, switchMap, catchError, throwError } from 'rxjs';
+import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
+import { Observable, tap, throwError, BehaviorSubject } from 'rxjs';
+import { catchError, switchMap, filter, take } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
-/**
- * Payload used for user login
- */
 export interface LoginRequest {
   email: string;
   password: string;
 }
 
-/**
- * Response returned after successful login
- */
 export interface LoginResponse {
   access: string;
   refresh: string;
@@ -23,16 +19,13 @@ export interface LoginResponse {
 })
 export class AuthService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:8000/api/users/login/';
-  private verifyUrl = 'http://localhost:8000/api/users/token/verify/';
-  private refreshUrl = 'http://localhost:8000/api/users/token/refresh/';
+  private baseUrl = environment.apiUrl;
+  private isRefreshing = false;
+  private refreshTokenSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null);
 
-
-  /**
-   * Authenticates user and stores access & refresh tokens
-   */
   login(credentials: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(this.apiUrl, credentials).pipe(
+    const url = `${this.baseUrl}/users/login/`;
+    return this.http.post<LoginResponse>(url, credentials).pipe(
       tap(response => {
         localStorage.setItem('access_token', response.access);
         localStorage.setItem('refresh_token', response.refresh);
@@ -40,58 +33,69 @@ export class AuthService {
     );
   }
 
-  /**
-   * Checks if access token exists in local storage
-   */
   isLoggedIn(): boolean {
     return !!localStorage.getItem('access_token');
   }
 
-  /**
-   * Clears authentication tokens from local storage
-   */
   logout() {
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
   }
 
-  /**
-   * Performs authenticated GET request with automatic token validation
-   * and refresh if access token has expired
-   */
-  authFetch<T>(url: string): Observable<T> {
-    const access = localStorage.getItem('access_token');
-    const refresh = localStorage.getItem('refresh_token');
+  authFetch<T>(endpoint: string): Observable<T> {
+    const fullUrl = `${this.baseUrl}${endpoint}`;
+    const token = localStorage.getItem('access_token');
 
-    if (!access) {
-      throw new Error('Brak access tokena');
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
     }
 
-    return this.http.post(this.verifyUrl, { token: access }).pipe(
-      switchMap(() =>
-        this.http.get<T>(url, {
-          headers: new HttpHeaders({
-            Authorization: `Bearer ${access}`
-          })
-        })
-      ),
-      catchError(() => {
-        if (!refresh) {
-          throw new Error('Brak refresh tokena');
+    return this.http.get<T>(fullUrl, { headers }).pipe(
+      catchError(error => {
+        if (error instanceof HttpErrorResponse && error.status === 401) {
+          return this.handle401Error<T>(endpoint);
         }
-
-        return this.http.post<any>(this.refreshUrl, { refresh }).pipe(
-          switchMap(res => {
-            localStorage.setItem('access_token', res.access);
-
-            return this.http.get<T>(url, {
-              headers: new HttpHeaders({
-                Authorization: `Bearer ${res.access}`
-              })
-            });
-          })
-        );
+        return throwError(() => error);
       })
     );
+  }
+
+  // --- LOGIKA ODŚWIEŻANIA ---
+  private handle401Error<T>(originalEndpoint: string): Observable<T> {
+    if (!this.isRefreshing) {
+      this.isRefreshing = true;
+      this.refreshTokenSubject.next(null);
+      const refresh = localStorage.getItem('refresh_token');
+
+      if (!refresh) {
+        this.logout();
+        return throwError(() => new Error('Brak refresh tokena'));
+      }
+
+      const refreshUrl = `${this.baseUrl}/users/token/refresh/`;
+
+      return this.http.post<any>(refreshUrl, { refresh }).pipe(
+        switchMap((token: any) => {
+          this.isRefreshing = false;
+          localStorage.setItem('access_token', token.access);
+          this.refreshTokenSubject.next(token.access);
+          return this.authFetch<T>(originalEndpoint);
+        }),
+        catchError((err) => {
+          this.isRefreshing = false;
+          this.logout();
+          return throwError(() => err);
+        })
+      );
+    } else {
+      return this.refreshTokenSubject.pipe(
+        filter(token => token != null),
+        take(1),
+        switchMap(() => {
+            return this.authFetch<T>(originalEndpoint);
+        })
+      );
+    }
   }
 }

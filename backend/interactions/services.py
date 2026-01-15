@@ -1,3 +1,5 @@
+from datetime import date
+
 from users.models import User
 
 from .models import Interaction, Match
@@ -41,5 +43,19 @@ def get_dating_feed(user):
 
     profiles = User.objects.exclude(id__in=interacted_users_ids).exclude(id=user.id)
 
-    # Tutaj warto dodać logikę filtrowania po wieku, lokalizacji itp.
+    # filtr płci
+    if user.gender_preference != User.GenderPreference.ANY:
+        profiles = profiles.filter(gender=user.gender_preference)
+
+    # filtr wieku
+    today = date.today()
+
+    if user.min_preferred_age is not None:
+        max_birth_date = date(
+            today.year - user.min_preferred_age,
+            today.month,
+            today.day,
+        )
+        profiles = profiles.filter(birth_date__lte=max_birth_date)
+
     return profiles

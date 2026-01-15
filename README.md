@@ -18,7 +18,6 @@ Przed uruchomieniem projektu upewnij się, że masz zainstalowane:
 
 1. **[Docker Desktop](https://www.docker.com/products/docker-desktop/)**
    - Uruchamia całą aplikację (backend + frontend + baza).
-   - *Windows:* Włącz "Use the WSL 2 based engine".
 
 2. **[Git](https://git-scm.com/downloads)** – do pobierania kodu i wersjonowania.
 3. **[Python 3.10+](https://www.python.org/downloads/)** – potrzebny lokalnie do `pre-commit`.
@@ -52,9 +51,13 @@ Otwórz nowe okno terminala i wykonaj migracje Django:
 ```bash
 docker-compose exec backend python manage.py migrate
 ```
-Opcjonalnie stwórz konto administratora:
+Stwórz konto administratora:
 ```bash
 docker-compose exec backend python manage.py createsuperuser
+
+Wskazówka: Formularz logowania posiada domyślne autouzupełnianie dla poniższych danych, co przyspiesza testowanie:
+Email: admin@admin.com
+Hasło: admin
 ```
 
 ---
@@ -79,7 +82,7 @@ docker-compose up
 docker-compose up -d
 ```
 
-### Formatowanie kodu
+### Formatowanie kodu - powinno tez robic sie automatycznie dzieki pre-commit
 ```bash
 docker-compose exec backend ruff format .
 docker-compose exec backend ruff check --fix .

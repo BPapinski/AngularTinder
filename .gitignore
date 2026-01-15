@@ -37,4 +37,3 @@ backend/config/__pycache__/
 package-lock.json
 package.json
 node_modules/
-backend/interactions/__pycache__/
