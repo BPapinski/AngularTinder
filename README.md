@@ -18,7 +18,6 @@ Przed uruchomieniem projektu upewnij się, że masz zainstalowane:
 
 1. **[Docker Desktop](https://www.docker.com/products/docker-desktop/)**
    - Uruchamia całą aplikację (backend + frontend + baza).
-   - *Windows:* Włącz "Use the WSL 2 based engine".
 
 2. **[Git](https://git-scm.com/downloads)** – do pobierania kodu i wersjonowania.
 3. **[Python 3.10+](https://www.python.org/downloads/)** – potrzebny lokalnie do `pre-commit`.
