@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, tap, throwError, BehaviorSubject } from 'rxjs';
 import { catchError, switchMap, filter, take } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 export interface LoginRequest {
   email: string;
@@ -18,13 +19,13 @@ export interface LoginResponse {
 })
 export class AuthService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:8000/api/users/login/';
-  private refreshUrl = 'http://localhost:8000/api/users/token/refresh/';
+  private baseUrl = environment.apiUrl;
   private isRefreshing = false;
   private refreshTokenSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null);
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(this.apiUrl, credentials).pipe(
+    const url = `${this.baseUrl}/users/login/`;
+    return this.http.post<LoginResponse>(url, credentials).pipe(
       tap(response => {
         localStorage.setItem('access_token', response.access);
         localStorage.setItem('refresh_token', response.refresh);
@@ -41,7 +42,8 @@ export class AuthService {
     localStorage.removeItem('refresh_token');
   }
 
-  authFetch<T>(url: string): Observable<T> {
+  authFetch<T>(endpoint: string): Observable<T> {
+    const fullUrl = `${this.baseUrl}${endpoint}`;
     const token = localStorage.getItem('access_token');
 
     let headers = new HttpHeaders();
@@ -49,10 +51,10 @@ export class AuthService {
       headers = headers.set('Authorization', `Bearer ${token}`);
     }
 
-    return this.http.get<T>(url, { headers }).pipe(
+    return this.http.get<T>(fullUrl, { headers }).pipe(
       catchError(error => {
         if (error instanceof HttpErrorResponse && error.status === 401) {
-          return this.handle401Error<T>(url);
+          return this.handle401Error<T>(endpoint);
         }
         return throwError(() => error);
       })
@@ -60,7 +62,7 @@ export class AuthService {
   }
 
   // --- LOGIKA ODŚWIEŻANIA ---
-  private handle401Error<T>(originalUrl: string): Observable<T> {
+  private handle401Error<T>(originalEndpoint: string): Observable<T> {
     if (!this.isRefreshing) {
       this.isRefreshing = true;
       this.refreshTokenSubject.next(null);
@@ -71,12 +73,14 @@ export class AuthService {
         return throwError(() => new Error('Brak refresh tokena'));
       }
 
-      return this.http.post<any>(this.refreshUrl, { refresh }).pipe(
+      const refreshUrl = `${this.baseUrl}/users/token/refresh/`;
+
+      return this.http.post<any>(refreshUrl, { refresh }).pipe(
         switchMap((token: any) => {
           this.isRefreshing = false;
           localStorage.setItem('access_token', token.access);
           this.refreshTokenSubject.next(token.access);
-          return this.authFetch<T>(originalUrl);
+          return this.authFetch<T>(originalEndpoint);
         }),
         catchError((err) => {
           this.isRefreshing = false;
@@ -89,7 +93,7 @@ export class AuthService {
         filter(token => token != null),
         take(1),
         switchMap(() => {
-            return this.authFetch<T>(originalUrl);
+            return this.authFetch<T>(originalEndpoint);
         })
       );
     }

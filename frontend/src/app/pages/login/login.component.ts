@@ -50,7 +50,7 @@ export class LoginComponent {
 
   callProtected() {
     this.authService
-      .authFetch<any>('http://localhost:8000/api/users/protected-test/')
+      .authFetch<any>('/users/protected-test/')
       .subscribe({
         next: (res: any) => {
           this.protectedResponse.set(JSON.stringify(res, null, 2));
