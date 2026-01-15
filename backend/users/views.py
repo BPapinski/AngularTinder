@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import User
-from .serializers import RegisterSerializer
+from .serializers import RegisterSerializer, UserProfileSerializer
 
 
 class RegisterView(generics.CreateAPIView):
@@ -17,3 +17,11 @@ class ProtectedTestView(APIView):
 
     def get(self, request):
         return Response({"message": "Authorized access works", "user": request.user.email})
+
+
+class UserProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        serializer = UserProfileSerializer(request.user)
+        return Response(serializer.data)
