@@ -1,27 +1,29 @@
 <div class="home-container">
-  <h1>Strona główna</h1>
+  <h1>Dating App</h1>
 
-  <!-- jesli zalogowany -->
   <ng-container *ngIf="authService.isLoggedIn(); else loginButton">
+
     <div class="header-actions">
-      <p>Jesteś zalogowany</p>
-      <button (click)="logout()">Wyloguj się</button>
+      <button class="profile-btn" (click)="goToProfile()">
+        Mój profil
+      </button>
+
+      <button (click)="logout()">Wyloguj</button>
     </div>
 
-    <p *ngIf="loading">Ładowanie feedu...</p>
+    <ng-container *ngIf="loading; else contentTpl">
+      <div class="loading-state">
+        <p>Szukam osób w okolicy...</p>
+      </div>
+    </ng-container>
 
-    <div *ngIf="!loading && profiles.length === 0">
-       Brak osób w Twojej okolicy.
-    </div>
+    <ng-template #contentTpl>
 
-    <div class="profiles">
-      <div class="profile-card" *ngFor="let p of profiles">
-
-        <img *ngIf="p.profile_image" [src]="p.profile_image" alt="Zdjęcie profilowe" />
-
-        <div *ngIf="!p.profile_image" class="placeholder-img">
-          {{ p.first_name.charAt(0) }}
-        </div>
+      <div class="no-profiles" *ngIf="profiles.length === 0">
+        <div class="empty-state-icon">🎉</div>
+        <h2>To już wszyscy!</h2>
+        <p>Nie ma więcej dopasowanych osób w Twojej okolicy.</p>
+        <p class="sub-text">Zajrzyj do nas ponownie później.</p>
 
         <h3>
           <a [routerLink]="['/profile', p.id]">
@@ -29,129 +31,62 @@
           </a>
         </h3>
         <p>{{ p.bio }}</p>
-
-        <!-- Przycisk Smash/Pass -->
-        <div class="profile-actions">
-          <button class="pass-btn" (click)="pass(p)">Pass</button>
-          <button class="smash-btn" (click)="smash(p)">Smash</button>
-        </div>
-
+        <button class="refresh-btn" (click)="loadFeed()">
+          Sprawdź ponownie
+        </button>
       </div>
-    </div>
+
+      <div class="profiles" *ngIf="profiles.length > 0">
+
+        <div
+          class="profile-card"
+          [ngStyle]="{
+            transform: 'translateX(' + translateX + 'px) rotate(' + rotate + 'deg)'
+          }"
+          (pointerdown)="onPointerDown($event)"
+          (pointermove)="onPointerMove($event)"
+          (pointerup)="onPointerUp()"
+          (pointercancel)="onPointerUp()"
+        >
+
+          <img
+            *ngIf="profiles[0].profile_image; else placeholder"
+            [src]="profiles[0].profile_image"
+            alt="Zdjęcie profilowe"
+          />
+
+          <ng-template #placeholder>
+            <div class="placeholder-img">
+              {{ profiles[0].first_name?.charAt(0) || '?' }}
+            </div>
+          </ng-template>
+
+          <h3>
+            {{ profiles[0].first_name || 'Nieznane imię' }}
+            <span *ngIf="profiles[0].age">({{ profiles[0].age }})</span>
+          </h3>
+
+          <p *ngIf="profiles[0].bio; else noBio">
+            {{ profiles[0].bio }}
+          </p>
+
+          <ng-template #noBio>
+            <p class="muted">Brak opisu</p>
+          </ng-template>
+
+          <div class="profile-actions">
+            <button class="pass-btn" (click)="forcePass()">Pass</button>
+            <button class="smash-btn" (click)="forceSmash()">Smash</button>
+          </div>
+
+        </div>
+      </div>
+
+    </ng-template>
+
   </ng-container>
 
-  <!-- jesli niezalogowany -->
   <ng-template #loginButton>
     <button (click)="login()">Zaloguj się</button>
   </ng-template>
 </div>
-
-
-
-<!-- style sa tu na chwile poki nie ma innego layoutu -->
-<style>
-.home-container {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 20px;
-  font-family: sans-serif;
-}
-
-h1 {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.header-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.header-actions button {
-  padding: 6px 12px;
-  cursor: pointer;
-}
-
-.profiles {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 20px;
-}
-
-.profile-card {
-  border: 1px solid #ccc;
-  border-radius: 12px;
-  padding: 15px;
-  text-align: center;
-  box-shadow: 1px 1px 5px rgba(0,0,0,0.1);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.profile-card img {
-  width: 120px;
-  height: 120px;
-  object-fit: cover;
-  border-radius: 50%;
-  margin-bottom: 10px;
-}
-
-.placeholder-img {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  background-color: #ccc;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 36px;
-  color: white;
-  margin-bottom: 10px;
-}
-
-.profile-card h3 {
-  margin: 8px 0 4px 0;
-}
-
-.profile-card p {
-  font-size: 14px;
-  color: #555;
-  margin-bottom: 10px;
-}
-
-/* Przyciski Smash / Pass */
-.profile-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.profile-actions button {
-  padding: 6px 12px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.pass-btn {
-  background-color: #e74c3c;
-  color: white;
-}
-
-.pass-btn:hover {
-  background-color: #c0392b;
-}
-
-.smash-btn {
-  background-color: #2ecc71;
-  color: white;
-}
-
-.smash-btn:hover {
-  background-color: #27ae60;
-}
-</style>

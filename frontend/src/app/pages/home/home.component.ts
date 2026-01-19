@@ -3,6 +3,8 @@ import { Router, RouterModule  } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
 import { DatingService, DatingProfile } from '../../services/dating.service';
+import { finalize } from 'rxjs';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-home',
@@ -15,41 +17,151 @@ export class HomeComponent implements OnInit {
   profiles: DatingProfile[] = [];
   loading = false;
 
+  // ===== SWIPE STATE =====
+  startX = 0;
+  translateX = 0;
+  rotate = 0;
+  isDragging = false;
+
+  readonly SWIPE_THRESHOLD = 120;
+  readonly USE_MOCKS = false; //  Set to true to use mock profiles
+
   constructor(
     public authService: AuthService,
     private datingService: DatingService,
     private router: Router,
-    private cdr: ChangeDetectorRef // 2. Wstrzyknięcie detektora
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
-    if (this.authService.isLoggedIn()) {
+    if (this.USE_MOCKS) {
+      this.loadMockProfiles();
+      return;
+    }
+
+    else if (this.authService.isLoggedIn()) {
       this.loadFeed();
     }
   }
 
+  // ======================
+  // MOCK PROFILES
+  // ======================
+  loadMockProfiles() {
+    this.profiles = [
+      { id: 1, first_name: 'Anna', age: 24, bio: 'Kawa i podróże ☕✈️', profile_image: null },
+      { id: 2, first_name: 'Kasia', age: 27, bio: 'Frontend i UX 💻', profile_image: null },
+      { id: 3, first_name: 'Magda', age: 22, bio: 'Fotografia 📸', profile_image: null },
+      { id: 4, first_name: 'Ola', age: 26, bio: 'Sport i psy 🐕', profile_image: null },
+      { id: 5, first_name: 'Natalia', age: 29, bio: 'City breaki 🌍', profile_image: null }
+    ] as DatingProfile[];
+  }
+
+  // ======================
+  // BACKEND FEED
+  // ======================
   loadFeed() {
-    console.log('1. Rozpoczynam loadFeed');
-    this.loading = true;
+  this.loading = true;
+  this.profiles = [];
 
-    this.datingService.getFeed().subscribe({
-      next: (profiles) => {
-        console.log('3. SUKCES! Odebrano dane:', profiles);
-
-        this.profiles = profiles;
+  this.datingService.getFeed()
+    .pipe(
+      finalize(() => {
         this.loading = false;
-
-        // 3. NUCLEARNA OPCJA: Ręczne wymuszenie odświeżenia widoku
         this.cdr.detectChanges();
+      })
+    )
+    .subscribe({
+      next: (profiles: any) => {
+        console.log('FEED RESPONSE', profiles);
 
-        console.log('4. Wymuszono odświeżenie widoku');
+        if (Array.isArray(profiles)) {
+            this.profiles = profiles;
+          } else {
+            // Jeśli to nie tablica (np. obiekt z komunikatem), uznajemy że lista jest pusta
+            this.profiles = [];
+          }
       },
-      error: (error) => {
-        console.error('Błąd:', error);
+      error: (err) => {
+        console.error('FEED ERROR', err);
+        this.profiles = [];
         this.loading = false;
-        this.cdr.detectChanges(); // Tutaj też warto dodać
+      },
+      complete: () => {
+        this.cdr.detectChanges();           // opcjonalnie, zwykle nie trzeba
       }
     });
+}
+
+  // ======================
+  // SWIPE
+  // ======================
+  onPointerDown(event: PointerEvent) {
+    this.isDragging = true;
+    this.startX = event.clientX;
+  }
+
+  onPointerMove(event: PointerEvent) {
+    if (!this.isDragging) return;
+    this.translateX = event.clientX - this.startX;
+    this.rotate = this.translateX / 15;
+  }
+
+  onPointerUp() {
+    if (!this.isDragging) return;
+    this.isDragging = false;
+
+    if (this.translateX > this.SWIPE_THRESHOLD) {
+      this.smash(this.profiles[0]);
+    } else if (this.translateX < -this.SWIPE_THRESHOLD) {
+      this.pass(this.profiles[0]);
+    }
+
+    this.resetCard();
+  }
+
+  smash(profile: DatingProfile) {
+    if (!profile) return;
+
+    console.log('SMASH (UI):', profile.first_name);
+    this.removeFirstProfile();
+
+    this.datingService.sendInteraction(profile.id, 'like').subscribe({
+      next: (res) => console.log('SMASH (API Success):', res),
+      error: (err) => console.error('SMASH (API Error):', err)
+    });
+  }
+
+  pass(profile: DatingProfile) {
+    if (!profile) return;
+
+    console.log('PASS (UI):', profile.first_name);
+    this.removeFirstProfile();
+
+    this.datingService.sendInteraction(profile.id, 'dislike').subscribe({
+      next: (res) => console.log('PASS (API Success):', res),
+      error: (err) => console.error('PASS (API Error):', err)
+    });
+  }
+
+  forceSmash() {
+    this.smash(this.profiles[0]);
+  }
+
+  forcePass() {
+    this.pass(this.profiles[0]);
+  }
+
+  resetCard() {
+    this.translateX = 0;
+    this.rotate = 0;
+  }
+
+  // ======================
+  // NAVIGATION
+  // ======================
+  goToProfile() {
+    this.router.navigate(['/profile']);
   }
 
   login() {
@@ -61,13 +173,8 @@ export class HomeComponent implements OnInit {
     this.router.navigate(['/login']);
   }
 
-  pass(profile: any) {
-    console.log('Pass clicked for', profile);
-    // Tutaj wywołanie API do backendu, np. oznaczenie profilu jako "przesunięty w lewo"
-  }
-
-  smash(profile: any) {
-    console.log('Smash clicked for', profile);
-    // Tutaj wywołanie API do backendu, np. oznaczenie profilu jako "polubiony"
+  private removeFirstProfile() {
+    this.profiles.shift();
+    this.resetCard();
   }
 }

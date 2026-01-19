@@ -7,4 +7,10 @@ export const routes: Routes = [
   { path: '', component: HomeComponent },
   {path: 'profile', component: UserProfile},
   { path: 'profile/:id', component: UserProfile },
+  {
+  path: 'register',
+  loadComponent: () =>
+    import('./pages/register/register.component')
+      .then(m => m.RegisterComponent)
+}
 ];
