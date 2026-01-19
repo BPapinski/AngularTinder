@@ -1,3 +1,12 @@
+.profile-card h3 a {
+  text-decoration: none;
+  color: #333;
+  cursor: pointer;
+}
+
+.profile-card h3 a:hover {
+  color: #007bff;
+  text-decoration: underline;
 /* === Layout główny === */
 .home-container {
   min-height: 100vh;

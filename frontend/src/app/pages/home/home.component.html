@@ -25,6 +25,12 @@
         <p>Nie ma więcej dopasowanych osób w Twojej okolicy.</p>
         <p class="sub-text">Zajrzyj do nas ponownie później.</p>
 
+        <h3>
+          <a [routerLink]="['/profile', p.id]">
+            {{ p.first_name }} ({{ p.age }})
+          </a>
+        </h3>
+        <p>{{ p.bio }}</p>
         <button class="refresh-btn" (click)="loadFeed()">
           Sprawdź ponownie
         </button>

@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -22,6 +23,10 @@ class ProtectedTestView(APIView):
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        serializer = UserProfileSerializer(request.user)
+    def get(self, request, user_id=None):
+        if user_id is not None:
+            user = get_object_or_404(User, id=user_id)
+        else:
+            user = request.user
+        serializer = UserProfileSerializer(user)
         return Response(serializer.data)

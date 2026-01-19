@@ -1,0 +1,15 @@
+<header>
+  <nav>
+    <a *ngIf="!authService.isLoggedIn()" routerLink="/login">
+      Login
+    </a>
+
+    <a *ngIf="authService.isLoggedIn()" (click)="logout()" href="#">
+      Logout
+    </a>
+
+    <a *ngIf="authService.isLoggedIn()" routerLink="/profile">
+      Profil
+    </a>
+  </nav>
+</header>
