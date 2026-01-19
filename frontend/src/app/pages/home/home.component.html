@@ -1,7 +1,6 @@
 <div class="home-container">
   <h1>Dating App</h1>
 
-  <!-- JEŚLI ZALOGOWANY -->
   <ng-container *ngIf="authService.isLoggedIn(); else loginButton">
 
     <div class="header-actions">
@@ -12,19 +11,25 @@
       <button (click)="logout()">Wyloguj</button>
     </div>
 
-    <!-- LOADING -->
     <ng-container *ngIf="loading; else contentTpl">
-      <p>Ładowanie feedu...</p>
+      <div class="loading-state">
+        <p>Szukam osób w okolicy...</p>
+      </div>
     </ng-container>
 
-    <!-- CONTENT -->
     <ng-template #contentTpl>
 
-      <div *ngIf="profiles.length === 0">
-        Brak osób w Twojej okolicy.
+      <div class="no-profiles" *ngIf="profiles.length === 0">
+        <div class="empty-state-icon">🎉</div>
+        <h2>To już wszyscy!</h2>
+        <p>Nie ma więcej dopasowanych osób w Twojej okolicy.</p>
+        <p class="sub-text">Zajrzyj do nas ponownie później.</p>
+
+        <button class="refresh-btn" (click)="loadFeed()">
+          Sprawdź ponownie
+        </button>
       </div>
 
-      <!-- SWIPE AREA -->
       <div class="profiles" *ngIf="profiles.length > 0">
 
         <div
@@ -38,7 +43,6 @@
           (pointercancel)="onPointerUp()"
         >
 
-          <!-- ZDJĘCIE / PLACEHOLDER -->
           <img
             *ngIf="profiles[0].profile_image; else placeholder"
             [src]="profiles[0].profile_image"
@@ -51,7 +55,6 @@
             </div>
           </ng-template>
 
-          <!-- INFO -->
           <h3>
             {{ profiles[0].first_name || 'Nieznane imię' }}
             <span *ngIf="profiles[0].age">({{ profiles[0].age }})</span>
@@ -65,7 +68,6 @@
             <p class="muted">Brak opisu</p>
           </ng-template>
 
-          <!-- AKCJE -->
           <div class="profile-actions">
             <button class="pass-btn" (click)="forcePass()">Pass</button>
             <button class="smash-btn" (click)="forceSmash()">Smash</button>
@@ -78,7 +80,6 @@
 
   </ng-container>
 
-  <!-- JEŚLI NIEZALOGOWANY -->
   <ng-template #loginButton>
     <button (click)="login()">Zaloguj się</button>
   </ng-template>

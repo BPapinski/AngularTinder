@@ -62,6 +62,7 @@ export class HomeComponent implements OnInit {
   // ======================
   loadFeed() {
   this.loading = true;
+  this.profiles = [];
 
   this.datingService.getFeed()
     .pipe(
@@ -71,13 +72,23 @@ export class HomeComponent implements OnInit {
       })
     )
     .subscribe({
-      next: (profiles) => {
+      next: (profiles: any) => {
         console.log('FEED RESPONSE', profiles);
-        this.profiles = profiles ?? [];
+
+        if (Array.isArray(profiles)) {
+            this.profiles = profiles;
+          } else {
+            // Jeśli to nie tablica (np. obiekt z komunikatem), uznajemy że lista jest pusta
+            this.profiles = [];
+          }
       },
       error: (err) => {
         console.error('FEED ERROR', err);
         this.profiles = [];
+        this.loading = false;
+      },
+      complete: () => {
+        this.cdr.detectChanges();           // opcjonalnie, zwykle nie trzeba
       }
     });
 }
