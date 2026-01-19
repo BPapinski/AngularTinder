@@ -1,0 +1,204 @@
+/* === Główny Kontener === */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+  height: 65px;
+  display: flex;
+  align-items: center;
+}
+
+.header-content {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  justify-content: space-between; /* Kluczowe: rozpycha elementy */
+  align-items: center;
+}
+
+/* === 1. Logo === */
+.logo {
+  font-family: 'Poppins', sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  text-decoration: none;
+  color: #333;
+  letter-spacing: -0.5px;
+}
+
+.highlight {
+  color: #ff5864; /* Główny kolor aplikacji */
+}
+
+/* === 2. Nawigacja środkowa === */
+.main-nav {
+  display: flex;
+  gap: 30px;
+}
+
+.main-nav a {
+  text-decoration: none;
+  color: #777;
+  font-weight: 600;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  transition: all 0.2s;
+}
+
+.main-nav a:hover {
+  background: #fff0f2;
+  color: #ff5864;
+}
+
+.main-nav a.active {
+  color: #ff5864;
+  background: rgba(255, 88, 100, 0.1);
+}
+
+/* Ukrywanie tekstów na bardzo małych ekranach (mobile) */
+@media (max-width: 768px) {
+  .nav-text { display: none; }
+  .logo { font-size: 20px; }
+  .main-nav { gap: 10px; }
+}
+
+/* === 3. Sekcja Użytkownika & Dropdown === */
+.user-section {
+  position: relative;
+  min-width: 120px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.user-dropdown-container {
+  position: relative; /* Ważne dla pozycjonowania menu */
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.user-trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  border-radius: 30px;
+  background: white;
+  border: 1px solid #eee;
+  transition: all 0.2s;
+}
+
+.user-trigger:hover {
+  background: #f9f9f9;
+  border-color: #ddd;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ff5864;
+}
+
+.user-name {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+.chevron {
+  font-size: 10px;
+  color: #999;
+}
+
+/* === Dropdown Menu (Logika Hover) === */
+.dropdown-menu {
+  position: absolute;
+  top: 100%; /* Zaraz pod triggerem */
+  right: 0;
+  width: 200px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+  border: 1px solid #eee;
+  padding: 8px;
+  margin-top: 10px;
+
+  /* Ukryte domyślnie */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+/* Pokazujemy menu, gdy najedziemy na kontener */
+.user-dropdown-container:hover .dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* Elementy w menu */
+.dropdown-item {
+  display: block;
+  padding: 12px 16px;
+  color: #444;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 10px;
+  transition: background 0.2s;
+  text-align: left;
+  border: none;
+  background: transparent;
+  width: 100%;
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  background: #f5f7fa;
+  color: #ff5864;
+}
+
+.divider {
+  height: 1px;
+  background: #eee;
+  margin: 6px 0;
+}
+
+.dropdown-item.logout {
+  color: #ff4b4b;
+}
+
+.dropdown-item.logout:hover {
+  background: #fff0f2;
+}
+
+/* === Przycisk Zaloguj (Dla niezalogowanych) === */
+.login-btn {
+  background: linear-gradient(90deg, #ff5864, #ff8f5e);
+  color: white;
+  text-decoration: none;
+  padding: 10px 24px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 14px;
+  transition: transform 0.2s;
+  box-shadow: 0 4px 12px rgba(255, 88, 100, 0.3);
+}
+
+.login-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 88, 100, 0.4);
+}

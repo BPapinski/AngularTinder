@@ -119,6 +119,7 @@ export class HomeComponent implements OnInit {
     this.resetCard();
   }
 
+
   smash(profile: DatingProfile) {
     if (!profile) return;
 

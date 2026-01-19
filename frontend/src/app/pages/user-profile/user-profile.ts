@@ -1,54 +1,177 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { AuthService } from '../../services/auth.service';
-import { ChangeDetectorRef } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { CommonModule, Location } from '@angular/common';
+import { ActivatedRoute, RouterModule } from '@angular/router';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms'; // <--- NOWE IMPORTY
+import { AuthService, UserProfile } from '../../services/auth.service';
 
 @Component({
   selector: 'app-user-profile',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule],
   templateUrl: './user-profile.html',
-  styleUrls: ['./user-profile.css']
+  styleUrl: './user-profile.css'
 })
-export class UserProfile implements OnInit {
-  private authService = inject(AuthService);
-  private cdr = inject(ChangeDetectorRef);
+export class UserProfileComponent implements OnInit {
   private route = inject(ActivatedRoute);
+  private authService = inject(AuthService);
+  private location = inject(Location);
+  private cdr = inject(ChangeDetectorRef);
+  private fb = inject(FormBuilder);
 
-  user: any = null;
+  user: UserProfile | null = null;
   loading = true;
+  isOwnProfile = false;
+
+  isEditing = false;
+  editForm!: FormGroup;
+  selectedFile: File | null = null;
+  previewUrl: string | null = null;
+  submitting = false;
 
   ngOnInit() {
-    const id = this.route.snapshot.paramMap.get('id');
-    const endpoint = id ? `/users/${id}/` : '/users/me/';
-    this.loadProfile(endpoint);
+    this.initForm()
+    const idParam = this.route.snapshot.paramMap.get('id');
+
+    if (idParam) {
+      const userId = +idParam;
+      this.checkIfOwnProfile(userId);
+      this.loadUser(userId);
+    } else {
+      this.isOwnProfile = true;
+      this.authService.fetchCurrentUser().subscribe({
+        next: (data) => {
+          this.user = data;
+          this.loading = false;
+          this.cdr.detectChanges(); // 3. <--- KLUCZOWA ZMIANA: Wymuś odświeżenie widoku
+        },
+        error: () => {
+          this.loading = false;
+          this.cdr.detectChanges(); // Wymuś też przy błędzie
+        }
+      });
+    }
   }
 
-  loadProfile(endpoint: string) {
-    this.loading = true;
-
-    this.authService.authFetch<any>(endpoint).subscribe({
-      next: (res) => {
-        this.user = res;
-        this.loading = false;
-        console.log('Loaded profile:', this.user);
-        this.cdr.markForCheck();
-      },
-      error: (err) => {
-        console.error('Error loading profile:', err);
-        this.loading = false;
-      },
+  initForm() {
+    this.editForm = this.fb.group({
+      first_name: ['', [Validators.required, Validators.minLength(2)]],
+      bio: ['', [Validators.maxLength(500)]],
+      gender: [''],
+      // Email i Wiek zazwyczaj są read-only lub walidowane inaczej,
+      // więc ich tu nie dajemy do edycji, chyba że backend pozwala.
     });
   }
 
-  get genderLabel() {
-    if (!this.user) return '';
-    return this.user.gender === 'M'
-      ? 'Mężczyzna'
-      : this.user.gender === 'F'
-      ? 'Kobieta'
-      : 'Inna';
+  startEditing() {
+    if (!this.user) return;
+    this.isEditing = true;
+    this.selectedFile = null;
+    this.previewUrl = null;
+
+    this.editForm.patchValue({
+      first_name: this.user.first_name,
+      bio: this.user.bio,
+      gender: this.user.gender
+    });
+  }
+
+
+  cancelEditing() {
+    this.isEditing = false;
+    this.selectedFile = null;
+    this.previewUrl = null;
+  }
+
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
+
+      // Podgląd obrazka przed wysłaniem
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.previewUrl = e.target.result;
+        this.cdr.detectChanges();
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  saveProfile() {
+    if (this.editForm.invalid) return;
+
+    this.submitting = true;
+    const formData = new FormData();
+
+    // Dodajemy pola tekstowe
+    formData.append('first_name', this.editForm.get('first_name')?.value);
+    formData.append('bio', this.editForm.get('bio')?.value || '');
+    formData.append('gender', this.editForm.get('gender')?.value);
+
+    // Dodajemy plik tylko jeśli został wybrany
+    if (this.selectedFile) {
+      formData.append('profile_image', this.selectedFile);
+    }
+
+    this.authService.updateProfile(formData).subscribe({
+      next: (updatedUser) => {
+        this.user = updatedUser;
+        this.isEditing = false;
+        this.submitting = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Błąd zapisu', err);
+        this.submitting = false;
+        alert('Nie udało się zapisać zmian.');
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  loadUser(id: number) {
+    this.authService.getUserById(id).subscribe({
+      next: (data) => {
+        this.user = data;
+        this.loading = false;
+        this.cdr.detectChanges(); // 3. <--- KLUCZOWA ZMIANA
+      },
+      error: (err) => {
+        console.error('Błąd pobierania profilu', err);
+        this.loading = false;
+        this.cdr.detectChanges(); // Wymuś też przy błędzie
+      }
+    });
+  }
+
+  // Reszta metod bez zmian (checkIfOwnProfile, getProfileImageUrl, etc.)
+  checkIfOwnProfile(visitedId: number) {
+    const currentUser = this.authService.currentUser();
+    if (currentUser && currentUser.id === visitedId) {
+      this.isOwnProfile = true;
+    } else {
+      this.isOwnProfile = false;
+    }
+  }
+
+  getProfileImageUrl(): string {
+    // Tutaj zmienimy logikę w Kroku 2, żeby naprawić błąd 404
+    if (!this.user || !this.user.profile_image) {
+      return 'assets/placeholder-user.png';
+    }
+    if (this.user.profile_image.startsWith('http')) {
+      return this.user.profile_image;
+    }
+    return `http://127.0.0.1:8000${this.user.profile_image}`;
+  }
+
+  getGenderLabel(code?: string): string {
+    if (code === 'M') return 'Mężczyzna';
+    if (code === 'F') return 'Kobieta';
+    return 'Nie podano';
+  }
+
+  goBack() {
+    this.location.back();
   }
 }

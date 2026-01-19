@@ -1,15 +1,60 @@
-<header>
-  <nav>
-    <a *ngIf="!authService.isLoggedIn()" routerLink="/login">
-      Login
+<header class="app-header">
+  <div class="header-content">
+
+    <a routerLink="/" class="logo">
+      Love<span class="highlight">App</span>
     </a>
 
-    <a *ngIf="authService.isLoggedIn()" (click)="logout()" href="#">
-      Logout
-    </a>
+    <nav class="main-nav">
+      <a routerLink="/" routerLinkActive="active">
+        <span class="nav-icon">🔍</span> <span class="nav-text">Odkrywaj</span>
+      </a>
+      <a routerLink="/matches" routerLinkActive="active">
+        <span class="nav-icon">💘</span> <span class="nav-text">Pary</span>
+      </a>
+      <a routerLink="/chats" routerLinkActive="active">
+        <span class="nav-icon">💬</span> <span class="nav-text">Chaty</span>
+      </a>
+    </nav>
 
-    <a *ngIf="authService.isLoggedIn()" routerLink="/profile">
-      Profil
-    </a>
-  </nav>
+    <div class="user-section">
+
+      <div class="user-dropdown-container" *ngIf="authService.isLoggedIn(); else loginBtn">
+
+        <div class="user-trigger">
+          <img
+            [src]="getProfileImageUrl()"
+            class="user-avatar"
+            alt="Avatar"
+            (error)="img.src='assets/placeholder-user.png'" #img
+          >
+
+          <span class="user-name">
+            {{ user?.first_name || user?.email || 'Użytkownik' }}
+          </span>
+
+          <span class="chevron">▼</span>
+        </div>
+
+        <div class="dropdown-menu">
+           <div class="menu-header" style="padding: 10px 16px; border-bottom: 1px solid #eee;">
+             <small style="color: #999;">Zalogowany jako:</small><br>
+             <strong>{{ user?.email }}</strong>
+           </div>
+
+          <a routerLink="/profile" class="dropdown-item">👤 Twój Profil</a>
+          <a routerLink="/settings" class="dropdown-item">⚙️ Ustawienia</a>
+          <div class="divider"></div>
+          <button (click)="logout()" class="dropdown-item logout">🚪 Wyloguj się</button>
+        </div>
+
+      </div>
+
+      <ng-template #loginBtn>
+        <a routerLink="/login" class="login-btn">Zaloguj się</a>
+      </ng-template>
+
+    </div>
+
+  </div>
 </header>

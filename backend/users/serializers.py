@@ -57,3 +57,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "profile_image",
             "created_at",
         ]
+        # To sprawi, że Swagger nie pokaże tych pól w formularzu edycji (request body),
+        # ale pokaże je w odpowiedzi (response body).
+        read_only_fields = ["id", "created_at", "email"]
