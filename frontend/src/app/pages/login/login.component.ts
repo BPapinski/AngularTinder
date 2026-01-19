@@ -1,4 +1,3 @@
-// src/app/pages/login/login.component.ts
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
@@ -33,32 +32,17 @@ export class LoginComponent {
 
       this.authService.login(credentials).subscribe({
         next: () => {
-          console.log('logged in successfully');
           this.errorMessage.set('');
           this.router.navigate(['/']);
         },
-        error: (err: any) => {
-          console.error('log in error ', err);
-          this.errorMessage.set('invalid credentials');
+        error: () => {
+          this.errorMessage.set('Nieprawidłowy email lub hasło');
         }
       });
     }
   }
 
-
-  protectedResponse = signal<string>('');
-
-  callProtected() {
-    this.authService
-      .authFetch<any>('/users/protected-test/')
-      .subscribe({
-        next: (res: any) => {
-          this.protectedResponse.set(JSON.stringify(res, null, 2));
-        },
-        error: (err: any) => {
-          console.error(err);
-          this.protectedResponse.set('Authorization failed');
-        }
-      });
+  goToRegister() {
+    this.router.navigate(['/register']);
   }
 }

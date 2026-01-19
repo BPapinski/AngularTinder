@@ -1,35 +1,50 @@
-<div class="login-container">
-  <h2>Zaloguj się</h2>
+<div class="login-page">
 
-  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+  <div class="login-card">
+    <h2>Zaloguj się</h2>
 
-    <div>
-      <label for="email">Email:</label>
-      <input id="email" type="email" formControlName="email">
-    </div>
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
 
-    <div>
-      <label for="password">Hasło:</label>
-      <input id="password" type="password" formControlName="password">
-    </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          placeholder="twoj@email.com"
+        />
+      </div>
 
-    <div *ngIf="errorMessage()" style="color: red;">
+      <div class="form-group">
+        <label for="password">Hasło</label>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          placeholder="••••••••"
+        />
+      </div>
+
+      <div class="error" *ngIf="errorMessage()">
         {{ errorMessage() }}
-    </div>
+      </div>
 
-    <button type="submit" [disabled]="loginForm.invalid" style="margin-top: 10px;">
-      Zaloguj
+      <button
+        type="submit"
+        class="login-btn"
+        [disabled]="loginForm.invalid"
+      >
+        Zaloguj
+      </button>
+    </form>
+
+    <div class="divider">lub</div>
+
+    <button class="secondary-btn" (click)="goToRegister()">
+        Utwórz konto
     </button>
-  </form>
 
-  <hr />
 
-  <button (click)="callProtected()">
-    Call protected endpoint
-  </button>
-
-  <pre>{{ protectedResponse() }}</pre>
+  </div>
 
 </div>
-
-/* tu mozna wszystko wyjebac i zmienic, to jest tylko dla testu jak cos */
