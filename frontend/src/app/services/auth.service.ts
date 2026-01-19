@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core'; // Dodano signal
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, tap, throwError, BehaviorSubject } from 'rxjs';
 import { catchError, switchMap, filter, take } from 'rxjs/operators';
@@ -14,6 +14,19 @@ export interface LoginResponse {
   refresh: string;
 }
 
+
+export interface UserProfile {
+  id: number;
+  email: string;
+  first_name: string;
+  gender?: string;
+  birth_date?: string;
+  age?: number;
+  bio?: string;
+  profile_image?: string; // Np. "/media/profile_images/SK1.jpg"
+  created_at?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -23,12 +36,26 @@ export class AuthService {
   private isRefreshing = false;
   private refreshTokenSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null);
 
+  currentUser = signal<UserProfile | null>(null);
+
+  constructor() {
+    // Przy odświeżeniu strony, jeśli mamy token, próbujemy pobrać dane użytkownika
+    if (this.isLoggedIn()) {
+      this.fetchCurrentUser().subscribe({
+        error: () => this.logout() // Jeśli token wygasł i refresh nie zadziałał
+      });
+    }
+  }
+
   login(credentials: LoginRequest): Observable<LoginResponse> {
     const url = `${this.baseUrl}/users/login/`;
     return this.http.post<LoginResponse>(url, credentials).pipe(
       tap(response => {
         localStorage.setItem('access_token', response.access);
         localStorage.setItem('refresh_token', response.refresh);
+
+        // === NOWE: Po udanym logowaniu od razu pobieramy dane usera ===
+        this.fetchCurrentUser().subscribe();
       })
     );
   }
@@ -44,6 +71,19 @@ export class AuthService {
   logout() {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
+
+    // === NOWE: Czyścimy dane użytkownika przy wylogowaniu ===
+    this.currentUser.set(null);
+  }
+
+  // === NOWA METODA: Pobiera dane o zalogowanym użytkowniku ===
+  fetchCurrentUser(): Observable<UserProfile> {
+    // Endpoint dopasowany do Twojego backendu
+    return this.authFetch<UserProfile>('/users/me/').pipe(
+      tap(user => {
+        this.currentUser.set(user);
+      })
+    );
   }
 
   authFetch<T>(endpoint: string): Observable<T> {

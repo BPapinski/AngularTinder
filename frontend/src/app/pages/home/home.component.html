@@ -1,40 +1,26 @@
 <div class="home-container">
-  <h1>Dating App</h1>
-
   <ng-container *ngIf="authService.isLoggedIn(); else loginButton">
 
-    <div class="header-actions">
-      <button class="profile-btn" (click)="goToProfile()">
-        Mój profil
-      </button>
-
-      <button (click)="logout()">Wyloguj</button>
-    </div>
-
     <ng-container *ngIf="loading; else contentTpl">
-      <div class="loading-state">
-        <p>Szukam osób w okolicy...</p>
+      <div class="state-container">
+        <div class="pulse-circle"></div>
+        <p>Szukam Twojej drugiej połówki...</p>
       </div>
     </ng-container>
 
     <ng-template #contentTpl>
-
-      <div class="no-profiles" *ngIf="profiles.length === 0">
-        <div class="empty-state-icon">🎉</div>
+      <div class="state-container no-profiles" *ngIf="profiles.length === 0">
+        <div class="empty-icon">💔</div>
         <h2>To już wszyscy!</h2>
-        <p>Nie ma więcej dopasowanych osób w Twojej okolicy.</p>
-        <p class="sub-text">Zajrzyj do nas ponownie później.</p>
-
-
-        <button class="refresh-btn" (click)="loadFeed()">
-          Sprawdź ponownie
+        <p>Wróć później, szukamy nowych osób w Twojej okolicy.</p>
+        <button class="action-btn refresh-btn" (click)="loadFeed()">
+          Odśwież radary
         </button>
       </div>
 
-      <div class="profiles" *ngIf="profiles.length > 0">
-
+      <div class="cards-stack" *ngIf="profiles.length > 0">
         <div
-          class="profile-card"
+          class="tinder-card"
           [ngStyle]="{
             transform: 'translateX(' + translateX + 'px) rotate(' + rotate + 'deg)'
           }"
@@ -44,44 +30,53 @@
           (pointercancel)="onPointerUp()"
         >
 
-          <img
-            *ngIf="profiles[0].profile_image; else placeholder"
-            [src]="profiles[0].profile_image"
-            alt="Zdjęcie profilowe"
-          />
+          <div class="card-image-wrapper">
+             <img
+              *ngIf="profiles[0].profile_image; else placeholder"
+              [src]="profiles[0].profile_image"
+              alt="Profile"
+            />
+            <ng-template #placeholder>
+              <div class="placeholder-img">
+                {{ profiles[0].first_name.charAt(0) || '?' }}
+              </div>
+            </ng-template>
 
-          <ng-template #placeholder>
-            <div class="placeholder-img">
-              {{ profiles[0].first_name.charAt(0) || '?' }}
+            <div class="card-overlay"></div>
+          </div>
+
+          <div class="card-content">
+            <div class="info-text">
+              <h2>
+                {{ profiles[0].first_name }}
+                <span class="age" *ngIf="profiles[0].age">{{ profiles[0].age }}</span>
+              </h2>
+              <p class="bio" *ngIf="profiles[0].bio">
+                {{ profiles[0].bio }}
+              </p>
+              <p class="bio muted" *ngIf="!profiles[0].bio">Brak opisu</p>
             </div>
-          </ng-template>
 
-          <h3>
-            {{ profiles[0].first_name || 'Nieznane imię' }}
-            <span *ngIf="profiles[0].age">({{ profiles[0].age }})</span>
-          </h3>
-
-          <p *ngIf="profiles[0].bio; else noBio">
-            {{ profiles[0].bio }}
-          </p>
-
-          <ng-template #noBio>
-            <p class="muted">Brak opisu</p>
-          </ng-template>
-
-          <div class="profile-actions">
-            <button class="pass-btn" (click)="forcePass()">Pass</button>
-            <button class="smash-btn" (click)="forceSmash()">Smash</button>
+            <div class="action-buttons">
+              <button class="btn-circle pass" (click)="forcePass()" title="Pass">
+                ✕
+              </button>
+              <button class="btn-circle smash" (click)="forceSmash()" title="Smash">
+                ♥
+              </button>
+            </div>
           </div>
 
         </div>
       </div>
-
     </ng-template>
-
   </ng-container>
 
   <ng-template #loginButton>
-    <button (click)="login()">Zaloguj się</button>
+    <div class="state-container">
+      <h1>Witaj!</h1>
+      <p>Zaloguj się, aby zacząć poznawać ludzi.</p>
+      <button class="action-btn" (click)="login()">Zaloguj się</button>
+    </div>
   </ng-template>
 </div>

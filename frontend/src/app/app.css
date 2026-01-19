@@ -1,0 +1,22 @@
+/* Dodaj to na samej górze pliku stylów globalnych */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+:root {
+  --primary: #ff5864;
+  --secondary: #ff8f5e;
+  --bg-gradient: linear-gradient(180deg, #fd297b, #ff655b);
+  --glass: rgba(255, 255, 255, 0.95);
+  --shadow-soft: 0 10px 40px -10px rgba(0,0,0,0.15);
+  --shadow-card: 0 20px 50px -10px rgba(0,0,0,0.3);
+}
+
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background-color: #f5f7fa;
+  overflow-x: hidden; /* Zapobiega poziomemu przewijaniu */
+}
+
+* {
+  box-sizing: border-box;
+}
