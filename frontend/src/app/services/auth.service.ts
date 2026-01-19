@@ -146,4 +146,27 @@ export class AuthService {
       );
     }
   }
+
+  updateProfile(formData: FormData): Observable<UserProfile> {
+    // Używamy FormData, aby przesłać tekst ORAZ plik (zdjęcie) w jednym zapytaniu
+    return this.authFetch<UserProfile>('/users/me/').pipe(
+      switchMap(() => {
+        // Mały hack: authFetch robi GET, a my potrzebujemy PATCH z FormData.
+        // Lepiej użyć bezpośrednio HttpClient z nagłówkami.
+        const url = `${this.baseUrl}/users/me/`;
+        const token = localStorage.getItem('access_token');
+        let headers = new HttpHeaders();
+        if (token) {
+          headers = headers.set('Authorization', `Bearer ${token}`);
+          // WAŻNE: Nie ustawiaj Content-Type na multipart/form-data ręcznie!
+          // Angular/Browser zrobi to sam, dodając boundary.
+        }
+        return this.http.patch<UserProfile>(url, formData, { headers });
+      }),
+      tap(updatedUser => {
+        // Aktualizujemy lokalny stan aplikacji (sygnał)
+        this.currentUser.set(updatedUser);
+      })
+    );
+  }
 }

@@ -14,74 +14,118 @@
       <div class="header-overlay"></div>
     </div>
 
-    <div class="card-identity">
-      <div class="avatar-wrapper">
-        <img
-          [src]="getProfileImageUrl()"
-          alt="Profile"
-          class="avatar"
-          (error)="img.src='assets/placeholder-user.png'" #img
-        />
-        <div class="online-indicator"></div>
+    <ng-container *ngIf="!isEditing; else editModeTemplate">
+
+      <div class="card-identity">
+        <div class="avatar-wrapper">
+          <img
+            [src]="getProfileImageUrl()"
+            alt="Profile"
+            class="avatar"
+            (error)="img.src='assets/placeholder-user.png'" #img
+          />
+          <div class="online-indicator"></div>
+        </div>
+
+        <h1>
+          {{ user.first_name }}
+          <span class="age-badge" *ngIf="user.age">{{ user.age }}</span>
+        </h1>
+        <p class="subtitle" *ngIf="user.created_at">
+           W aplikacji od {{ user.created_at | date:'yyyy' }}
+        </p>
       </div>
 
-      <h1>
-        {{ user.first_name }}
-        <span class="age-badge" *ngIf="user.age">{{ user.age }}</span>
-      </h1>
+      <div class="card-body">
+        <div class="bio-box" *ngIf="user.bio">
+          <h3>O mnie</h3>
+          <p>{{ user.bio }}</p>
+        </div>
 
-      <p class="subtitle" *ngIf="user.created_at">
-        W aplikacji od {{ user.created_at | date:'yyyy' }}
-      </p>
-    </div>
-
-    <div class="card-body">
-
-      <div class="bio-box" *ngIf="user.bio">
-        <h3>O mnie</h3>
-        <p>{{ user.bio }}</p>
-      </div>
-
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="icon">🎂</span>
-          <div class="text">
-            <span class="label">Wiek</span>
-            <span class="val">{{ user.age || '?' }} lat</span>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="icon">🎂</span>
+            <div class="text">
+              <span class="label">Wiek</span>
+              <span class="val">{{ user.age || '?' }} lat</span>
+            </div>
+          </div>
+          <div class="info-item">
+            <span class="icon">⚧</span>
+            <div class="text">
+              <span class="label">Płeć</span>
+              <span class="val">{{ getGenderLabel(user.gender) }}</span>
+            </div>
+          </div>
+          <div class="info-item" *ngIf="isOwnProfile">
+            <span class="icon">✉️</span>
+            <div class="text">
+              <span class="label">Email</span>
+              <span class="val">{{ user.email }}</span>
+            </div>
           </div>
         </div>
 
-        <div class="info-item">
-          <span class="icon">⚧</span>
-          <div class="text">
-            <span class="label">Płeć</span>
-            <span class="val">{{ getGenderLabel(user.gender) }}</span>
+        <div class="actions-area">
+          <ng-container *ngIf="isOwnProfile; else otherUserActions">
+            <button class="btn btn-primary" (click)="startEditing()">✏️ Edytuj Profil</button>
+            <button class="btn btn-outline">⚙️ Ustawienia</button>
+          </ng-container>
+
+          <ng-template #otherUserActions>
+            <button class="btn btn-message">💬 Wyślij wiadomość</button>
+            <button class="btn btn-danger">🚫 Zgłoś / Usuń parę</button>
+          </ng-template>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-template #editModeTemplate>
+      <form [formGroup]="editForm" (ngSubmit)="saveProfile()" class="edit-form-container">
+
+        <div class="card-identity">
+          <div class="avatar-wrapper edit-avatar-wrapper">
+            <img [src]="getProfileImageUrl()" class="avatar" alt="Preview">
+            <input type="file" #fileInput (change)="onFileSelected($event)" style="display:none" accept="image/*">
+            <button type="button" class="change-photo-btn" (click)="fileInput.click()">
+              📷 Zmień
+            </button>
           </div>
         </div>
 
-        <div class="info-item" *ngIf="isOwnProfile">
-          <span class="icon">✉️</span>
-          <div class="text">
-            <span class="label">Email</span>
-            <span class="val">{{ user.email }}</span>
+        <div class="card-body">
+          <h2 class="edit-title">Edycja profilu</h2>
+
+          <div class="form-group">
+            <label>Imię</label>
+            <input type="text" formControlName="first_name" placeholder="Twoje imię">
+          </div>
+
+          <div class="form-group">
+            <label>Płeć</label>
+            <select formControlName="gender">
+              <option value="">Wybierz...</option>
+              <option value="M">Mężczyzna</option>
+              <option value="F">Kobieta</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>O mnie</label>
+            <textarea formControlName="bio" rows="4" placeholder="Napisz coś o sobie..."></textarea>
+          </div>
+
+          <div class="actions-area">
+            <button type="submit" class="btn btn-primary" [disabled]="submitting || editForm.invalid">
+              {{ submitting ? 'Zapisywanie...' : '💾 Zapisz zmiany' }}
+            </button>
+            <button type="button" class="btn btn-outline" (click)="cancelEditing()">
+              Anuluj
+            </button>
           </div>
         </div>
-      </div>
+      </form>
+    </ng-template>
 
-      <div class="actions-area">
-
-        <ng-container *ngIf="isOwnProfile; else otherUserActions">
-          <button class="btn btn-primary">✏️ Edytuj Profil</button>
-          <button class="btn btn-outline">⚙️ Ustawienia</button>
-        </ng-container>
-
-        <ng-template #otherUserActions>
-          <button class="btn btn-message">💬 Wyślij wiadomość</button>
-          <button class="btn btn-danger">🚫 Zgłoś / Usuń parę</button>
-        </ng-template>
-
-      </div>
-
-    </div>
   </div>
 </div>
