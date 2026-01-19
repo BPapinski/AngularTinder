@@ -105,6 +105,10 @@ export class AuthService {
     );
   }
 
+  getUserById(id: number): Observable<UserProfile> {
+    return this.authFetch<UserProfile>(`/users/${id}/`);
+  }
+
   // --- LOGIKA ODŚWIEŻANIA ---
   private handle401Error<T>(originalEndpoint: string): Observable<T> {
     if (!this.isRefreshing) {
