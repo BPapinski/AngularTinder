@@ -1,0 +1,285 @@
+/* === Layout główny === */
+.home-container {
+  min-height: 100vh;
+  padding: 16px;
+  background: linear-gradient(180deg, #ff5864, #ff8f5e);
+  font-family: "Segoe UI", Roboto, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Zapobiega przewijaniu całego body przy swipe na iOS */
+  overscroll-behavior-y: none;
+}
+
+/* === Nagłówek === */
+h1 {
+  color: white;
+  margin-bottom: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+/* === Górny pasek === */
+.header-actions {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+  margin-bottom: 16px;
+}
+
+.header-actions button {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  padding: 8px 14px;
+  border-radius: 20px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.header-actions button:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+/* === Feed (Kontener kart) === */
+.profiles {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+  height: 580px; /* Zwiększyłem lekko, żeby przyciski miały oddech */
+}
+
+/* === Karta profilu === */
+.profile-card {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  /* === KLUCZOWE DLA SWIPE === */
+  cursor: grab;
+
+  /* Blokuje przewijanie strony na telefonie podczas trzymania karty */
+  touch-action: none;
+
+  /* Blokuje zaznaczanie tekstu podczas przeciągania */
+  user-select: none;
+  -webkit-user-select: none;
+
+  /* Płynny powrót karty po puszczeniu (jeśli nie swipe) */
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* Kiedy trzymamy kartę (active), wyłączamy transition,
+   żeby karta "kleiła" się idealnie do kursora bez opóźnień */
+.profile-card:active {
+  cursor: grabbing;
+  transition: none;
+}
+
+/* === Zdjęcie === */
+.profile-card img,
+.placeholder-img {
+  width: 100%;
+  height: 340px;
+  border-radius: 16px;
+  object-fit: cover;
+  display: block;
+
+  /* === NAPRAWA PRZESUWANIA ZA ZDJĘCIE === */
+  /* Sprawia, że zdjęcie jest "przezroczyste" dla kursora,
+     więc zdarzenie pointerdown trafia do .profile-card */
+  pointer-events: none;
+
+  /* Dodatkowe zabezpieczenie przed "przeciąganiem pliku" */
+  -webkit-user-drag: none;
+}
+
+/* === Placeholder === */
+.placeholder-img {
+  background: linear-gradient(135deg, #ff5864, #ff8f5e);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 64px;
+  font-weight: bold;
+  color: white;
+  pointer-events: none; /* To samo dla placeholdera */
+}
+
+/* === Info === */
+.profile-card h3 {
+  margin: 12px 0 4px;
+  font-size: 22px;
+  color: #333;
+}
+
+.profile-card p {
+  font-size: 14px;
+  color: #555;
+  flex-grow: 1;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.muted {
+  color: #999;
+  font-style: italic;
+}
+
+/* === Przyciski (Pass/Smash) === */
+.profile-actions {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 12px;
+  padding-bottom: 8px;
+}
+
+.profile-actions button {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: none;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+  transition: transform 0.15s ease, background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-actions button:hover {
+  transform: scale(1.05);
+}
+
+.profile-actions button:active {
+  transform: scale(0.95);
+}
+
+/* PASS */
+.pass-btn {
+  background: #fff;
+  color: #ff4458;
+  border: 1px solid #ffeded;
+}
+.pass-btn:hover {
+  background: #fff0f2;
+}
+
+/* SMASH */
+.smash-btn {
+  background: #fff;
+  color: #2ecc71;
+  border: 1px solid #eafff2;
+}
+.smash-btn:hover {
+  background: #f0fff6;
+}
+
+/* === Stany animacji (opcjonalne, jeśli używasz klas CSS do animacji wyjścia) === */
+.profile-card.like {
+  transform: translateX(150%) rotate(20deg) !important;
+  opacity: 0;
+}
+
+.profile-card.dislike {
+  transform: translateX(-150%) rotate(-20deg) !important;
+  opacity: 0;
+}
+
+/* ... Twoje istniejące style ... */
+
+/* === PUSTY STAN (NO PROFILES) === */
+.no-profiles {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: white;
+  margin-top: 60px; /* Odsunięcie od nagłówka */
+  animation: fadeIn 0.5s ease-in;
+}
+
+.empty-state-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.no-profiles h2 {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.no-profiles p {
+  font-size: 16px;
+  max-width: 280px;
+  line-height: 1.5;
+  opacity: 0.95;
+}
+
+.no-profiles .sub-text {
+  font-size: 14px;
+  opacity: 0.8;
+  margin-bottom: 32px;
+}
+
+.refresh-btn {
+  background: white;
+  color: #ff5864;
+  border: none;
+  padding: 12px 32px;
+  border-radius: 30px;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.refresh-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+
+.refresh-btn:active {
+  transform: translateY(1px);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.loading-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+  color: white;
+  font-size: 18px;
+  font-weight: 500;
+}

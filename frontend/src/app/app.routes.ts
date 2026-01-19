@@ -4,4 +4,10 @@ import { HomeComponent } from './pages/home/home.component';
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: '', component: HomeComponent },
+  {
+  path: 'register',
+  loadComponent: () =>
+    import('./pages/register/register.component')
+      .then(m => m.RegisterComponent)
+}
 ];
