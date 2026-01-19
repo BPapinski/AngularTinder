@@ -7,6 +7,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  /* Zapobiega przewijaniu całego body przy swipe na iOS */
+  overscroll-behavior-y: none;
 }
 
 /* === Nagłówek === */
@@ -43,12 +45,12 @@ h1 {
   background: rgba(255, 255, 255, 0.35);
 }
 
-/* === Feed === */
+/* === Feed (Kontener kart) === */
 .profiles {
   position: relative;
   width: 100%;
   max-width: 360px;
-  height: 520px;
+  height: 580px; /* Zwiększyłem lekko, żeby przyciski miały oddech */
 }
 
 /* === Karta profilu === */
@@ -64,18 +66,43 @@ h1 {
   flex-direction: column;
   justify-content: space-between;
 
-  /* przygotowanie pod swipe */
+  /* === KLUCZOWE DLA SWIPE === */
+  cursor: grab;
+
+  /* Blokuje przewijanie strony na telefonie podczas trzymania karty */
+  touch-action: none;
+
+  /* Blokuje zaznaczanie tekstu podczas przeciągania */
+  user-select: none;
+  -webkit-user-select: none;
+
+  /* Płynny powrót karty po puszczeniu (jeśli nie swipe) */
   transition: transform 0.3s ease, opacity 0.3s ease;
-  touch-action: pan-y;
+}
+
+/* Kiedy trzymamy kartę (active), wyłączamy transition,
+   żeby karta "kleiła" się idealnie do kursora bez opóźnień */
+.profile-card:active {
+  cursor: grabbing;
+  transition: none;
 }
 
 /* === Zdjęcie === */
 .profile-card img,
 .placeholder-img {
   width: 100%;
-  height: 320px;
+  height: 340px;
   border-radius: 16px;
   object-fit: cover;
+  display: block;
+
+  /* === NAPRAWA PRZESUWANIA ZA ZDJĘCIE === */
+  /* Sprawia, że zdjęcie jest "przezroczyste" dla kursora,
+     więc zdarzenie pointerdown trafia do .profile-card */
+  pointer-events: none;
+
+  /* Dodatkowe zabezpieczenie przed "przeciąganiem pliku" */
+  -webkit-user-drag: none;
 }
 
 /* === Placeholder === */
@@ -87,70 +114,88 @@ h1 {
   font-size: 64px;
   font-weight: bold;
   color: white;
+  pointer-events: none; /* To samo dla placeholdera */
 }
 
 /* === Info === */
 .profile-card h3 {
   margin: 12px 0 4px;
   font-size: 22px;
+  color: #333;
 }
 
 .profile-card p {
   font-size: 14px;
   color: #555;
   flex-grow: 1;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* === Przyciski === */
+.muted {
+  color: #999;
+  font-style: italic;
+}
+
+/* === Przyciski (Pass/Smash) === */
 .profile-actions {
   display: flex;
   justify-content: space-around;
   margin-top: 12px;
+  padding-bottom: 8px;
 }
 
 .profile-actions button {
-  width: 56px;
-  height: 56px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   border: none;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: bold;
   cursor: pointer;
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
-  transition: transform 0.15s ease;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+  transition: transform 0.15s ease, background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-actions button:hover {
+  transform: scale(1.05);
 }
 
 .profile-actions button:active {
-  transform: scale(0.9);
+  transform: scale(0.95);
 }
 
 /* PASS */
 .pass-btn {
-  background: #ff4458;
-  color: white;
+  background: #fff;
+  color: #ff4458;
+  border: 1px solid #ffeded;
+}
+.pass-btn:hover {
+  background: #fff0f2;
 }
 
 /* SMASH */
 .smash-btn {
-  background: #2ecc71;
-  color: white;
+  background: #fff;
+  color: #2ecc71;
+  border: 1px solid #eafff2;
+}
+.smash-btn:hover {
+  background: #f0fff6;
 }
 
-/* === Stany pomocnicze (na później do swipe) === */
+/* === Stany animacji (opcjonalne, jeśli używasz klas CSS do animacji wyjścia) === */
 .profile-card.like {
-  transform: translateX(120%) rotate(15deg);
+  transform: translateX(150%) rotate(20deg) !important;
   opacity: 0;
 }
 
 .profile-card.dislike {
-  transform: translateX(-120%) rotate(-15deg);
+  transform: translateX(-150%) rotate(-20deg) !important;
   opacity: 0;
-}
-.profile-card {
-  cursor: grab;
-}
-
-.profile-card:active {
-  cursor: grabbing;
-  transition: none;
 }

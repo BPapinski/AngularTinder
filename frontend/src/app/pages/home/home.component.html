@@ -12,50 +12,69 @@
       <button (click)="logout()">Wyloguj</button>
     </div>
 
-    <p *ngIf="loading">Ładowanie feedu...</p>
+    <!-- LOADING -->
+    <ng-container *ngIf="loading; else contentTpl">
+      <p>Ładowanie feedu...</p>
+    </ng-container>
 
-    <div *ngIf="!loading && profiles.length === 0">
-      Brak osób w Twojej okolicy.
-    </div>
+    <!-- CONTENT -->
+    <ng-template #contentTpl>
 
-    <!-- SWIPE AREA -->
-    <div class="profiles" *ngIf="profiles.length > 0">
-
-      <div
-        class="profile-card"
-        [ngStyle]="{
-          transform: 'translateX(' + translateX + 'px) rotate(' + rotate + 'deg)'
-        }"
-        (pointerdown)="onPointerDown($event)"
-        (pointermove)="onPointerMove($event)"
-        (pointerup)="onPointerUp()"
-        (pointercancel)="onPointerUp()"
-      >
-
-        <!-- ZDJĘCIE -->
-        <img
-          *ngIf="profiles[0].profile_image"
-          [src]="profiles[0].profile_image"
-          alt="Zdjęcie profilowe"
-        />
-
-        <!-- PLACEHOLDER -->
-        <div *ngIf="!profiles[0].profile_image" class="placeholder-img">
-          {{ profiles[0].first_name.charAt(0) }}
-        </div>
-
-        <!-- INFO -->
-        <h3>{{ profiles[0].first_name }} ({{ profiles[0].age }})</h3>
-        <p>{{ profiles[0].bio }}</p>
-
-        <!-- AKCJE -->
-        <div class="profile-actions">
-          <button class="pass-btn" (click)="forcePass()">Pass</button>
-          <button class="smash-btn" (click)="forceSmash()">Smash</button>
-        </div>
-
+      <div *ngIf="profiles.length === 0">
+        Brak osób w Twojej okolicy.
       </div>
-    </div>
+
+      <!-- SWIPE AREA -->
+      <div class="profiles" *ngIf="profiles.length > 0">
+
+        <div
+          class="profile-card"
+          [ngStyle]="{
+            transform: 'translateX(' + translateX + 'px) rotate(' + rotate + 'deg)'
+          }"
+          (pointerdown)="onPointerDown($event)"
+          (pointermove)="onPointerMove($event)"
+          (pointerup)="onPointerUp()"
+          (pointercancel)="onPointerUp()"
+        >
+
+          <!-- ZDJĘCIE / PLACEHOLDER -->
+          <img
+            *ngIf="profiles[0].profile_image; else placeholder"
+            [src]="profiles[0].profile_image"
+            alt="Zdjęcie profilowe"
+          />
+
+          <ng-template #placeholder>
+            <div class="placeholder-img">
+              {{ profiles[0].first_name?.charAt(0) || '?' }}
+            </div>
+          </ng-template>
+
+          <!-- INFO -->
+          <h3>
+            {{ profiles[0].first_name || 'Nieznane imię' }}
+            <span *ngIf="profiles[0].age">({{ profiles[0].age }})</span>
+          </h3>
+
+          <p *ngIf="profiles[0].bio; else noBio">
+            {{ profiles[0].bio }}
+          </p>
+
+          <ng-template #noBio>
+            <p class="muted">Brak opisu</p>
+          </ng-template>
+
+          <!-- AKCJE -->
+          <div class="profile-actions">
+            <button class="pass-btn" (click)="forcePass()">Pass</button>
+            <button class="smash-btn" (click)="forceSmash()">Smash</button>
+          </div>
+
+        </div>
+      </div>
+
+    </ng-template>
 
   </ng-container>
 

@@ -3,6 +3,8 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
 import { DatingService, DatingProfile } from '../../services/dating.service';
+import { finalize } from 'rxjs';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-home',
@@ -22,12 +24,13 @@ export class HomeComponent implements OnInit {
   isDragging = false;
 
   readonly SWIPE_THRESHOLD = 120;
-  readonly USE_MOCKS = true;
+  readonly USE_MOCKS = false; //  Set to true to use mock profiles
 
   constructor(
     public authService: AuthService,
     private datingService: DatingService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -36,7 +39,7 @@ export class HomeComponent implements OnInit {
       return;
     }
 
-    if (this.authService.isLoggedIn()) {
+    else if (this.authService.isLoggedIn()) {
       this.loadFeed();
     }
   }
@@ -58,17 +61,28 @@ export class HomeComponent implements OnInit {
   // BACKEND FEED
   // ======================
   loadFeed() {
-    this.loading = true;
-    this.datingService.getFeed().subscribe({
+  this.loading = true;
+
+  this.datingService.getFeed()
+    .pipe(
+      finalize(() => {
+        this.loading = false;
+        this.cdr.detectChanges();
+      })
+    )
+    .subscribe({
       next: (profiles) => {
-        this.profiles = profiles;
-        this.loading = false;
+        console.log('FEED RESPONSE', profiles);
+        this.profiles = profiles ?? [];
+        // this.cdr.detectChanges();
       },
-      error: () => {
-        this.loading = false;
+      error: (err) => {
+        console.error('FEED ERROR', err);
+        this.profiles = [];
+        // this.cdr.detectChanges();
       }
     });
-  }
+}
 
   // ======================
   // SWIPE
