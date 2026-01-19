@@ -1,10 +1,10 @@
-/* === Layout główny z Gradientem === */
+/* === Layout główny (Jasne tło jak w profilu) === */
 .home-container {
   /* Fix dla mobile: pełna wysokość minus header */
   height: calc(100vh - 55px);
 
-  /* PRZYWRÓCONY KOLOROWY GRADIENT */
-  background: linear-gradient(180deg, #ff5864, #ff8f5e);
+  /* ZMIANA: Zamiast gradientu, dajemy jasne tło jak w profilu */
+  background: #f0f2f5;
 
   display: flex;
   flex-direction: column;
@@ -12,10 +12,10 @@
   align-items: center;
   overflow: hidden;
   position: relative;
-  font-family: 'Poppins', sans-serif; /* Pamiętaj o imporcie fontu */
+  font-family: 'Poppins', sans-serif;
 }
 
-/* === Stany (Loading, Empty, Login) - teraz BIAŁY TEKST === */
+/* === Stany (Loading, Empty, Login) - ZMIANA NA CIEMNY TEKST === */
 .state-container {
   display: flex;
   flex-direction: column;
@@ -24,21 +24,20 @@
   text-align: center;
   padding: 20px;
   animation: fadeIn 0.5s ease-out;
-  color: white; /* Kluczowa zmiana dla czytelności */
+  color: #333; /* ZMIANA: Ciemny tekst, bo tło jest jasne */
 }
 
 .empty-icon {
   font-size: 70px;
   margin-bottom: 15px;
-  /* Dodajemy cień do emoji, żeby nie zlewało się z tłem */
-  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.2));
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.1));
 }
 
 .state-container h2 {
   font-size: 28px;
   font-weight: 700;
   margin: 0 0 10px;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  color: #222;
 }
 
 .state-container p {
@@ -46,7 +45,7 @@
   max-width: 320px;
   line-height: 1.5;
   margin-bottom: 30px;
-  opacity: 0.9;
+  color: #666; /* Szary tekst dla lepszej czytelności */
 }
 
 /* === Karty (Feed) === */
@@ -54,7 +53,7 @@
   position: relative;
   width: 92%;
   max-width: 380px;
-  height: 65vh; /* Trochę wyższa karta */
+  height: 65vh;
   max-height: 600px;
   min-height: 400px;
 }
@@ -65,8 +64,8 @@
   height: 100%;
   border-radius: 20px;
   background: white;
-  /* Mocniejszy cień, żeby karta odcinała się od kolorowego tła */
-  box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.3);
+  /* Delikatniejszy cień na jasnym tle */
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
   overflow: hidden;
   cursor: grab;
   touch-action: none;
@@ -104,7 +103,7 @@
   color: #aaa;
 }
 
-/* Overlay - pozostaje ciemny gradient na dole zdjęcia dla czytelności imienia */
+/* Overlay - gradient na dole zdjęcia (bez zmian) */
 .card-overlay {
   position: absolute;
   bottom: 0;
@@ -115,14 +114,14 @@
   pointer-events: none;
 }
 
-/* === Treść na karcie === */
+/* === Treść na karcie (Tekst na zdjęciu - musi być BIAŁY) === */
 .card-content {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
   padding: 20px;
-  color: white;
+  color: white; /* Tekst na karcie pozostaje biały */
   display: flex;
   flex-direction: column;
 }
@@ -145,15 +144,11 @@
   font-size: 15px;
   line-height: 1.4;
   text-shadow: 0 1px 3px rgba(0,0,0,0.5);
-
-  /* Ograniczenie tekstu do 2-3 linii */
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-
-.muted { opacity: 0.8; font-style: italic; }
 
 /* === Przyciski Akcji (Pass/Smash) === */
 .action-buttons {
@@ -174,37 +169,34 @@
   align-items: center;
   justify-content: center;
   transition: transform 0.2s, background 0.2s;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.15); /* Lżejszy cień */
 }
 
 .btn-circle:hover { transform: scale(1.1); }
 .btn-circle:active { transform: scale(0.95); }
 
-/* Styl Pass - biały z czerwonym X */
 .pass {
   background: white;
   color: #ff4b4b;
 }
 
-/* Styl Smash - biały z zielonym sercem */
 .smash {
   background: white;
   color: #2ecc71;
-  /* Opcjonalnie: zielone tło, białe serce, jeśli wolisz */
-  /* background: #2ecc71; color: white; */
 }
 
-/* === Główny Przycisk (np. Odśwież / Zaloguj) === */
+/* === Główny Przycisk (np. Odśwież / Zaloguj) - ZMIANA STYLU === */
 .action-btn {
-  background: white; /* Białe tło kontrastuje z kolorową stroną */
-  color: #ff5864; /* Kolor tekstu pasuje do tła strony */
+  /* ZMIANA: Teraz przycisk ma gradient, bo tło strony jest jasne */
+  background: linear-gradient(90deg, #ff5864, #ff8f5e);
+  color: white;
   border: none;
   padding: 14px 40px;
   border-radius: 50px;
   font-weight: 700;
   font-size: 16px;
   cursor: pointer;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  box-shadow: 0 8px 20px rgba(255, 88, 100, 0.3); /* Cień w kolorze przycisku */
   transition: transform 0.2s;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -212,24 +204,24 @@
 
 .action-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 25px rgba(0,0,0,0.25);
+  box-shadow: 0 12px 25px rgba(255, 88, 100, 0.4);
 }
 .action-btn:active { transform: translateY(1px); }
 
-/* === Animacja ładowania === */
+/* === Animacja ładowania - ZMIANA KOLORU === */
 .pulse-circle {
   width: 50px;
   height: 50px;
-  background: white; /* Białe kółko */
+  background: #ff5864; /* ZMIANA: Kolorowe kółko na jasnym tle */
   border-radius: 50%;
   margin-bottom: 20px;
   animation: pulse 1.5s infinite;
 }
 
 @keyframes pulse {
-  0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
-  70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(255, 255, 255, 0); }
-  100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+  0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(255, 88, 100, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(255, 88, 100, 0); }
+  100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(255, 88, 100, 0); }
 }
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
