@@ -7,6 +7,7 @@
 .profile-card h3 a:hover {
   color: #007bff;
   text-decoration: underline;
+}
 /* === Layout główny === */
 .home-container {
   min-height: 100vh;

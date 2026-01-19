@@ -28,7 +28,9 @@ class Migration(migrations.Migration):
             model_name="user",
             name="gender",
             field=models.CharField(
-                choices=[("M", "Mężczyzna"), ("F", "Kobieta"), ("O", "Inna")], default="M", max_length=1
+                choices=[("M", "Mężczyzna"), ("F", "Kobieta"), ("O", "Inna")],
+                default="M",
+                max_length=1,
             ),
         ),
     ]

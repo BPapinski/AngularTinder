@@ -15,7 +15,9 @@ def perform_like(sender, receiver):
     is_match = False
 
     has_liked_back = Interaction.objects.filter(
-        user=receiver, target_user=sender, action__in=[Interaction.LIKE, Interaction.SUPERLIKE]
+        user=receiver,
+        target_user=sender,
+        action__in=[Interaction.LIKE, Interaction.SUPERLIKE],
     ).exists()
 
     if has_liked_back:

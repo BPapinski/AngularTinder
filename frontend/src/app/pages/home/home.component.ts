@@ -4,7 +4,6 @@ import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
 import { DatingService, DatingProfile } from '../../services/dating.service';
 import { finalize } from 'rxjs';
-import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-home',

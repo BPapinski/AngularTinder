@@ -16,11 +16,24 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="Interaction",
             fields=[
-                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
                 (
                     "action",
                     models.CharField(
-                        choices=[("LIKE", "Like"), ("DISLIKE", "Dislike"), ("SUPERLIKE", "Super Like")], max_length=10
+                        choices=[
+                            ("LIKE", "Like"),
+                            ("DISLIKE", "Dislike"),
+                            ("SUPERLIKE", "Super Like"),
+                        ],
+                        max_length=10,
                     ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
@@ -49,7 +62,15 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="Match",
             fields=[
-                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("is_active", models.BooleanField(default=True)),
                 (

@@ -30,8 +30,14 @@ class DislikeUserView(APIView):
         target_user = get_object_or_404(User, pk=user_id)
 
         if target_user == request.user:
-            return Response({"error": "You cannot reject yourself"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "You cannot reject yourself"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         perform_dislike(request.user, target_user)
 
-        return Response({"status": "rejected", "message": "User has been skipped."}, status=status.HTTP_200_OK)
+        return Response(
+            {"status": "rejected", "message": "User has been skipped."},
+            status=status.HTTP_200_OK,
+        )
