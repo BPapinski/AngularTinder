@@ -74,12 +74,10 @@ export class HomeComponent implements OnInit {
       next: (profiles) => {
         console.log('FEED RESPONSE', profiles);
         this.profiles = profiles ?? [];
-        // this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('FEED ERROR', err);
         this.profiles = [];
-        // this.cdr.detectChanges();
       }
     });
 }
@@ -112,13 +110,27 @@ export class HomeComponent implements OnInit {
   }
 
   smash(profile: DatingProfile) {
-    console.log('SMASH:', profile);
-    this.profiles.shift();
+    if (!profile) return;
+
+    console.log('SMASH (UI):', profile.first_name);
+    this.removeFirstProfile();
+
+    this.datingService.sendInteraction(profile.id, 'like').subscribe({
+      next: (res) => console.log('SMASH (API Success):', res),
+      error: (err) => console.error('SMASH (API Error):', err)
+    });
   }
 
   pass(profile: DatingProfile) {
-    console.log('PASS:', profile);
-    this.profiles.shift();
+    if (!profile) return;
+
+    console.log('PASS (UI):', profile.first_name);
+    this.removeFirstProfile();
+
+    this.datingService.sendInteraction(profile.id, 'dislike').subscribe({
+      next: (res) => console.log('PASS (API Success):', res),
+      error: (err) => console.error('PASS (API Error):', err)
+    });
   }
 
   forceSmash() {
@@ -148,5 +160,10 @@ export class HomeComponent implements OnInit {
   logout() {
     this.authService.logout();
     this.router.navigate(['/login']);
+  }
+
+  private removeFirstProfile() {
+    this.profiles.shift();
+    this.resetCard();
   }
 }
