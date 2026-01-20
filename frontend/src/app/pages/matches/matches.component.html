@@ -1,27 +1,28 @@
 <div class="home-container">
-  <ng-container *ngIf="authService.isLoggedIn(); else loginTpl">
+  <ng-container *ngIf="authService.currentUser(); else loginTpl">
 
     <ng-container *ngIf="loading; else contentTpl">
-      <div class="state-container">
-        <div class="pulse-circle"></div>
-        <p>Ładuję Twoje matche...</p>
-      </div>
+      <p>Ładuję Twoje matche...</p>
     </ng-container>
 
     <ng-template #contentTpl>
-      <div class="state-container no-profiles" *ngIf="matches.length === 0">
-        <div class="empty-icon">💔</div>
-        <h2>Brak matchy</h2>
-        <p>Polub kogoś, aby zobaczyć go tutaj.</p>
-      </div>
+    <div *ngIf="matches.length === 0">
+        <p>Nie masz jeszcze matchy 💔</p>
+    </div>
 
-      <div class="matches-grid" *ngIf="matches.length > 0">
-        <div class="match-card" *ngFor="let match of matches" (click)="goToChat(match.id)">
+      <div class="matches-stack" *ngIf="matches.length > 0">
+
+        <div
+          class="match-card"
+          *ngFor="let match of visibleMatches; let i = index; trackBy: trackById"
+          [class.active]="i === 0"
+          [class.animating]="animating"
+          [style.transform]="getTransform(i)"
+          [style.zIndex]="visibleMatches.length - i"
+        >
           <div class="avatar">
-            <img
-            *ngIf="match.user.profile_image; else placeholder"
-            [src]="match.user.profile_image"
-            />
+            <img *ngIf="match.user.profile_image; else placeholder"
+                 [src]="match.user.profile_image">
             <ng-template #placeholder>
               <div class="placeholder-img">
                 {{ match.user.first_name.charAt(0) }}
@@ -31,22 +32,24 @@
 
           <div class="match-info">
             <h3>
-                {{ match.user.first_name }}
-                <span *ngIf="match.user.age">{{ match.user.age }}</span>
+              {{ match.user.first_name }}
+              <span *ngIf="match.user.age">, {{ match.user.age }}</span>
             </h3>
-            <p>Match 💖</p>
-            <button class="chat-btn" (click)="goToChat(match.id)">💬 Chat</button>
-            </div>
+            <button class="chat-btn" (click)="goToChat(match.id)">
+              💬 Chat
+            </button>
+          </div>
         </div>
-      </div>
-    </ng-template>
 
+        <button class="nav left" (click)="prev()">←</button>
+        <button class="nav right" (click)="next()">→</button>
+
+      </div>
+
+    </ng-template>
   </ng-container>
 
   <ng-template #loginTpl>
-    <div class="state-container">
-      <h1>Zaloguj się</h1>
-      <button class="action-btn" routerLink="/login">Zaloguj się</button>
-    </div>
+    <button routerLink="/login">Zaloguj się</button>
   </ng-template>
 </div>

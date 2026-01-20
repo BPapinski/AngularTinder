@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core'; // Dodano signal
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, tap, throwError, BehaviorSubject } from 'rxjs';
-import { catchError, switchMap, filter, take } from 'rxjs/operators';
+import { catchError, switchMap, filter, take, finalize } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 export interface LoginRequest {
@@ -37,6 +37,7 @@ export class AuthService {
   private refreshTokenSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null);
 
   currentUser = signal<UserProfile | null>(null);
+  userLoading = signal<boolean>(false);
 
   constructor() {
     // Przy odświeżeniu strony, jeśli mamy token, próbujemy pobrać dane użytkownika
@@ -78,11 +79,10 @@ export class AuthService {
 
   // === NOWA METODA: Pobiera dane o zalogowanym użytkowniku ===
   fetchCurrentUser(): Observable<UserProfile> {
-    // Endpoint dopasowany do Twojego backendu
+    this.userLoading.set(true);  // <-- start loading
     return this.authFetch<UserProfile>('/users/me/').pipe(
-      tap(user => {
-        this.currentUser.set(user);
-      })
+      tap(user => this.currentUser.set(user)),
+      finalize(() => this.userLoading.set(false)) // <-- stop loading
     );
   }
 
