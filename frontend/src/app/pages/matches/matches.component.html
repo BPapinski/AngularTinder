@@ -1,52 +1,59 @@
 <div class="home-container">
   <ng-container *ngIf="authService.currentUser(); else loginTpl">
 
-    <ng-container *ngIf="loading(); else contentTpl">
-      <p>Ładuję Twoje matche...</p>
-    </ng-container>
+    <div class="content">
 
-    <ng-template #contentTpl>
-    <div *ngIf="matches.length === 0">
-        <p>Nie masz jeszcze matchy 💔</p>
-    </div>
+      <div class="header">
+        <h2 class="title">✨ Twoje pary</h2>
+        <p class="subtitle">Osoby, z którymi możesz zacząć rozmowę</p>
+      </div>
 
-      <div class="matches-stack" *ngIf="matches.length > 0">
+      <ng-container *ngIf="loading(); else listTpl">
+        <p class="loading">Ładuję matche...</p>
+      </ng-container>
 
-        <div
-          class="match-card"
-          *ngFor="let match of visibleMatches; let i = index; trackBy: trackById"
-          [class.active]="i === 0"
-          [class.animating]="animating"
-          [style.transform]="getTransform(i)"
-          [style.zIndex]="visibleMatches.length - i"
-        >
-          <div class="avatar">
-            <img *ngIf="match.user.profile_image; else placeholder"
-                 [src]="match.user.profile_image">
-            <ng-template #placeholder>
-              <div class="placeholder-img">
-                {{ match.user.first_name.charAt(0) }}
+      <ng-template #listTpl>
+
+        <div *ngIf="matches.length === 0" class="empty">
+          Nie masz jeszcze matchy 💔
+        </div>
+
+        <div class="matches-list" *ngIf="matches.length > 0">
+          <div
+            class="match-row"
+            *ngFor="let match of matches; trackBy: trackById"
+            (click)="goToChat(match.id)"
+          >
+
+            <div class="avatar">
+              <img *ngIf="match.user.profile_image; else placeholder"
+                   [src]="match.user.profile_image">
+              <ng-template #placeholder>
+                <div class="placeholder-img">
+                  {{ match.user.first_name.charAt(0) }}
+                </div>
+              </ng-template>
+
+              <span *ngIf="isNew(match)" class="badge">NOWY</span>
+            </div>
+
+            <div class="info">
+              <div class="name">
+                {{ match.user.first_name }}
+                <span *ngIf="match.user.age">, {{ match.user.age }}</span>
               </div>
-            </ng-template>
-          </div>
+              <div class="sub">
+                Kliknij aby rozpocząć rozmowę
+              </div>
+            </div>
 
-          <div class="match-info">
-            <h3>
-              {{ match.user.first_name }}
-              <span *ngIf="match.user.age">, {{ match.user.age }}</span>
-            </h3>
-            <button class="chat-btn" (click)="goToChat(match.id)">
-              💬 Chat
-            </button>
+            <div class="chevron">›</div>
           </div>
         </div>
 
-        <button class="nav left" (click)="prev()">←</button>
-        <button class="nav right" (click)="next()">→</button>
+      </ng-template>
 
-      </div>
-
-    </ng-template>
+    </div>
   </ng-container>
 
   <ng-template #loginTpl>

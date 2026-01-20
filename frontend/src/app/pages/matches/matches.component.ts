@@ -26,12 +26,7 @@ export interface MatchItem {
 export class MatchesComponent implements OnInit {
 
   matches: MatchItem[] = [];
-  visibleMatches: MatchItem[] = [];
-
   loading = signal<boolean>(false);
-
-  animating = false;
-  direction: 'left' | 'right' = 'right';
 
   constructor(
     public authService: AuthService,
@@ -46,21 +41,13 @@ export class MatchesComponent implements OnInit {
   }
 
   loadMatches() {
-    if (this.loading()) return;
-
     this.loading.set(true);
+
     this.datingService.getMatches()
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
-        next: res => {
-          this.matches = res || [];
-          this.visibleMatches = this.matches.slice(0, 3);
-        },
-        error: (err) => {
-          console.error('Error loading matches:', err);
-          this.matches = [];
-          this.visibleMatches = [];
-        }
+        next: res => this.matches = res || [],
+        error: () => this.matches = []
       });
   }
 
@@ -68,38 +55,10 @@ export class MatchesComponent implements OnInit {
     return item.id;
   }
 
-  getTransform(index: number): string {
-    if (index === 0 && this.animating) {
-      return this.direction === 'right'
-        ? 'translateX(120%) rotate(10deg)'
-        : 'translateX(-120%) rotate(-10deg)';
-    }
-
-    return `translateY(${index * 12}px) scale(${1 - index * 0.05})`;
-  }
-
-  next() {
-    if (this.animating) return;
-    this.direction = 'right';
-    this.animate();
-  }
-
-  prev() {
-    if (this.animating) return;
-    this.direction = 'left';
-    this.animate();
-  }
-
-  private animate() {
-    this.animating = true;
-
-    setTimeout(() => {
-      const first = this.matches.shift();
-      if (first) this.matches.push(first);
-
-      this.visibleMatches = this.matches.slice(0, 3);
-      this.animating = false;
-    }, 300);
+  isNew(match: MatchItem): boolean {
+    const created = new Date(match.created_at).getTime();
+    const now = Date.now();
+    return now - created < 24 * 60 * 60 * 1000; // 24h
   }
 
   goToChat(id: number) {
