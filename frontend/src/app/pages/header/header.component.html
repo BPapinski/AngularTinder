@@ -6,16 +6,33 @@
     </a>
 
     <nav class="main-nav">
-      <a routerLink="/" routerLinkActive="active">
-        <span class="nav-icon">🔍</span> <span class="nav-text">Odkrywaj</span>
-      </a>
-      <a routerLink="/matches" routerLinkActive="active">
-        <span class="nav-icon">💘</span> <span class="nav-text">Pary</span>
-      </a>
-      <a routerLink="/chats" routerLinkActive="active">
-        <span class="nav-icon">💬</span> <span class="nav-text">Chaty</span>
-      </a>
-    </nav>
+  <a
+    routerLink="/"
+    routerLinkActive="active"
+    [routerLinkActiveOptions]="{ exact: true }"
+  >
+    <span class="nav-icon">🔍</span>
+    <span class="nav-text">Odkrywaj</span>
+  </a>
+
+  <a
+    routerLink="/matches"
+    routerLinkActive="active"
+    [routerLinkActiveOptions]="{ exact: true }"
+  >
+    <span class="nav-icon">💘</span>
+    <span class="nav-text">Pary</span>
+  </a>
+
+  <a
+    routerLink="/chats"
+    routerLinkActive="active"
+    [routerLinkActiveOptions]="{ exact: true }"
+  >
+    <span class="nav-icon">💬</span>
+    <span class="nav-text">Chaty</span>
+  </a>
+</nav>
 
     <div class="user-section">
 
