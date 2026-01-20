@@ -1,7 +1,7 @@
 <div class="home-container">
   <ng-container *ngIf="authService.currentUser(); else loginTpl">
 
-    <ng-container *ngIf="loading; else contentTpl">
+    <ng-container *ngIf="loading(); else contentTpl">
       <p>Ładuję Twoje matche...</p>
     </ng-container>
 

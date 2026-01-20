@@ -43,6 +43,7 @@ export class AuthService {
     // Przy odświeżeniu strony, jeśli mamy token, próbujemy pobrać dane użytkownika
     if (this.isLoggedIn()) {
       this.fetchCurrentUser().subscribe({
+        next: (user) => this.currentUser.set(user),
         error: () => this.logout() // Jeśli token wygasł i refresh nie zadziałał
       });
     }

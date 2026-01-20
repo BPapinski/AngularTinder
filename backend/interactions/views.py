@@ -52,6 +52,7 @@ class UserMatchesView(APIView):
 
     def get(self, request):
         queryset = Match.objects.filter(Q(user1=request.user) | Q(user2=request.user), is_active=True)
+        print(f"[DEBUG] User {request.user.id} has {queryset.count()} matches")  # <-- DEBUG
 
         serializer = self.serializer_class(queryset, many=True, context={"request": request})
         return Response(serializer.data)

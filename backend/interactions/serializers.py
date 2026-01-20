@@ -38,6 +38,8 @@ class MatchSerializer(serializers.ModelSerializer):
 
 
 class MatchUserSerializer(serializers.ModelSerializer):
+    profile_image = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = ["id", "first_name", "age", "bio", "gender", "profile_image"]

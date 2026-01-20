@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { finalize } from 'rxjs';
@@ -28,7 +28,7 @@ export class MatchesComponent implements OnInit {
   matches: MatchItem[] = [];
   visibleMatches: MatchItem[] = [];
 
-  loading = false;
+  loading = signal<boolean>(false);
 
   animating = false;
   direction: 'left' | 'right' = 'right';
@@ -40,24 +40,24 @@ export class MatchesComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    // JEŚLI JEST TOKEN -> ładowanie matchy od razu
     if (this.authService.isLoggedIn()) {
       this.loadMatches();
     }
   }
 
   loadMatches() {
-    if (this.loading || this.matches.length > 0) return;
+    if (this.loading()) return;
 
-    this.loading = true;
+    this.loading.set(true);
     this.datingService.getMatches()
-      .pipe(finalize(() => this.loading = false))
+      .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: res => {
           this.matches = res || [];
           this.visibleMatches = this.matches.slice(0, 3);
         },
-        error: () => {
+        error: (err) => {
+          console.error('Error loading matches:', err);
           this.matches = [];
           this.visibleMatches = [];
         }

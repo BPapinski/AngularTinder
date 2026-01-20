@@ -2,7 +2,7 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, timeout } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service'; // Pamiętaj o imporcie AuthService
 
@@ -49,16 +49,22 @@ export class DatingService {
 
   getFeed(): Observable<any> {
     const url = `${this.apiUrl}/interactions/feed/`;
-    return this.http.get<any>(url, { headers: this.getHeaders() });
+    return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(
+      timeout(10000)
+    );
   }
 
   sendInteraction(userId: number, action: 'like' | 'dislike'): Observable<any> {
     const url = `${this.apiUrl}/interactions/${action}/${userId}/`;
-    return this.http.post(url, {}, { headers: this.getHeaders() });
+    return this.http.post(url, {}, { headers: this.getHeaders() }).pipe(
+      timeout(10000)
+    );
   }
 
   getMatches(): Observable<MatchItem[]> {
     const url = `${this.apiUrl}/interactions/matches/`;
-    return this.http.get<MatchItem[]>(url, { headers: this.getHeaders() });
+    return this.http.get<MatchItem[]>(url, { headers: this.getHeaders() }).pipe(
+      timeout(10000)
+    );
   }
 }
