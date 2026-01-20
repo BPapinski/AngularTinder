@@ -1,9 +1,12 @@
 from django.contrib.auth import get_user_model
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from .models import Match
+from .serializers import MatchSerializer
 from .services import perform_dislike, perform_like
 
 User = get_user_model()
@@ -41,3 +44,12 @@ class DislikeUserView(APIView):
             {"status": "rejected", "message": "User has been skipped."},
             status=status.HTTP_200_OK,
         )
+
+
+class UserMatchesView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        matches = Match.objects.filter(Q(user1=request.user) | Q(user2=request.user), is_active=True)
+        serializer = MatchSerializer(matches, many=True)
+        return Response(serializer.data)
