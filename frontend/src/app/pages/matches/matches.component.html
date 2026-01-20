@@ -1,0 +1,62 @@
+<div class="home-container">
+  <ng-container *ngIf="authService.currentUser(); else loginTpl">
+
+    <div class="content">
+
+      <div class="header">
+        <h2 class="title">✨ Twoje pary</h2>
+        <p class="subtitle">Osoby, z którymi możesz zacząć rozmowę</p>
+      </div>
+
+      <ng-container *ngIf="loading(); else listTpl">
+        <p class="loading">Ładuję matche...</p>
+      </ng-container>
+
+      <ng-template #listTpl>
+
+        <div *ngIf="matches.length === 0" class="empty">
+          Nie masz jeszcze matchy 💔
+        </div>
+
+        <div class="matches-list" *ngIf="matches.length > 0">
+          <div
+            class="match-row"
+            *ngFor="let match of matches; trackBy: trackById"
+            (click)="goToChat(match.id)"
+          >
+
+            <div class="avatar">
+              <img *ngIf="match.user.profile_image; else placeholder"
+                   [src]="match.user.profile_image">
+              <ng-template #placeholder>
+                <div class="placeholder-img">
+                  {{ match.user.first_name.charAt(0) }}
+                </div>
+              </ng-template>
+
+              <span *ngIf="isNew(match)" class="badge">NOWY</span>
+            </div>
+
+            <div class="info">
+              <div class="name">
+                {{ match.user.first_name }}
+                <span *ngIf="match.user.age">, {{ match.user.age }}</span>
+              </div>
+              <div class="sub">
+                Kliknij aby rozpocząć rozmowę
+              </div>
+            </div>
+
+            <div class="chevron">›</div>
+          </div>
+        </div>
+
+      </ng-template>
+
+    </div>
+  </ng-container>
+
+  <ng-template #loginTpl>
+    <button routerLink="/login">Zaloguj się</button>
+  </ng-template>
+</div>
