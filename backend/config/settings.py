@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "users",
+    "chat",
     "interactions",
     "rest_framework_simplejwt",
     "drf_spectacular",
