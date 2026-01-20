@@ -47,9 +47,11 @@ class DislikeUserView(APIView):
 
 
 class UserMatchesView(APIView):
+    serializer_class = MatchSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        matches = Match.objects.filter(Q(user1=request.user) | Q(user2=request.user), is_active=True)
-        serializer = MatchSerializer(matches, many=True)
+        queryset = Match.objects.filter(Q(user1=request.user) | Q(user2=request.user), is_active=True)
+
+        serializer = self.serializer_class(queryset, many=True, context={"request": request})
         return Response(serializer.data)

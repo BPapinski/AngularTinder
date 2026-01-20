@@ -14,11 +14,23 @@ export interface DatingProfile {
   profile_image: string | null;
 }
 
+export interface MatchUser {
+  id: number;
+  first_name: string;
+  age?: number;
+  profile_image?: string | null;
+}
+
+export interface MatchItem {
+  id: number;
+  user: MatchUser;
+  created_at: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class DatingService {
-  // environment.apiUrl to 'http://localhost:8000/api'
   private apiUrl = environment.apiUrl;
 
   constructor(
@@ -26,33 +38,27 @@ export class DatingService {
     private authService: AuthService
   ) {}
 
-  // Tworzenie nagłówków z tokenem
   private getHeaders(): HttpHeaders {
-    // Zakładam, że AuthService ma metodę getToken().
-    // Jeśli trzymasz token tylko w localStorage, użyj: localStorage.getItem('token')
     const token = this.authService.getToken();
 
     return new HttpHeaders({
-      // Ważne: Sprawdź czy Twój backend (Django) oczekuje "Token" czy "Bearer"
-      // Domyślnie Django REST Framework używa "Token"
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
     });
   }
 
   getFeed(): Observable<any> {
-    // === POPRAWKA ŚCIEŻKI ===
-    // Było: /feed/
-    // Jest: /interactions/feed/
     const url = `${this.apiUrl}/interactions/feed/`;
-
     return this.http.get<any>(url, { headers: this.getHeaders() });
   }
 
   sendInteraction(userId: number, action: 'like' | 'dislike'): Observable<any> {
-    // URL: /api/interactions/like/{id}/
     const url = `${this.apiUrl}/interactions/${action}/${userId}/`;
-
     return this.http.post(url, {}, { headers: this.getHeaders() });
+  }
+
+  getMatches(): Observable<MatchItem[]> {
+    const url = `${this.apiUrl}/interactions/matches/`;
+    return this.http.get<MatchItem[]>(url, { headers: this.getHeaders() });
   }
 }
