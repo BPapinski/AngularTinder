@@ -76,7 +76,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   getProfileImage(path: string | null): string {
-    if(!path) return 'public/assets/placeholder-user.png';
+    if(!path) return '/assets/placeholder-user.png';
     if (path.startsWith('http')) return path;
     return `${this.BACKEND_URL}${path}`;
   }
