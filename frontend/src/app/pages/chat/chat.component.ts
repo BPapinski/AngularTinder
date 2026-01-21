@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Subscription, Observable } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { ActivatedRoute } from '@angular/router';
+import { map } from 'rxjs/operators';
 
 @Component({
   standalone: true,
@@ -63,10 +64,13 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
 
       if (userIdFromUrl && this.matches$) {
         // Szukamy użytkownika o tym ID na liście
-        const userToSelect = this.matches$.find(m => m.id == userIdFromUrl);
+        const userToSelect$ = this.matches$.pipe(
+          // Wchodzimy do środka strumienia, gdzie jest tablica 'matches'
+          map((matches$: any[]) => matches$.find(m => m.id == userIdFromUrl))
+        );
 
-        if (userToSelect) {
-          this.selectUser(userToSelect);
+        if (userToSelect$) {
+          this.selectUser(userToSelect$);
         }
       }
 
