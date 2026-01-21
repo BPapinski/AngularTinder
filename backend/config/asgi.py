@@ -1,18 +1,14 @@
-# config/asgi.py
-
 import os
 
 from django.core.asgi import get_asgi_application
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
-
-# 1. NAJPIERW inicjalizujemy Django. To ładuje aplikacje i modele.
 django_asgi_app = get_asgi_application()
 
-# 2. DOPIERO TERAZ importujemy rzeczy z naszych aplikacji (channels, chat itp.)
-import chat.routing
-from channels.routing import ProtocolTypeRouter, URLRouter
-from chat.middleware import JWTAuthMiddleware
+# Importy poniżej muszą mieć 'noqa: E402', aby Ruff/Flake8 ich nie przesuwał ani nie zgłaszał
+import chat.routing  # noqa: E402
+from channels.routing import ProtocolTypeRouter, URLRouter  # noqa: E402
+from chat.middleware import JWTAuthMiddleware  # noqa: E402
 
 application = ProtocolTypeRouter(
     {
