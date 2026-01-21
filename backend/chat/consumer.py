@@ -10,28 +10,20 @@ class ChatConsumer(AsyncWebsocketConsumer):
         try:
             self.user = self.scope.get("user")
 
-            # Logika Fake Usera (dla testów bez ciasteczek)
             if not self.user or self.user.is_anonymous:
-                self.user = type("FakeUser", (), {"id": 1, "is_anonymous": False})()
+                print("Odrzucono połączenie: Brak autoryzacji lub zły token")
+                await self.close(code=4001)
+                return
 
-            # Pobieranie ID z URL
             self.other_id = self.scope["url_route"]["kwargs"]["user_id"]
-
-            # Tworzenie nazwy grupy
-            # UWAGA: Upewnij się, że self.other_id to int lub rzutuj na int
             user_id = int(self.user.id)
             other_id = int(self.other_id)
 
             self.room_group_name = f"chat_{min(user_id, other_id)}_{max(user_id, other_id)}"
 
-            print(f"DEBUG: Próba dołączenia do grupy {self.room_group_name}...")  # Log debugowania
-
-            # Dołączanie do grupy (Tu często pada błąd Redisa)
             await self.channel_layer.group_add(self.room_group_name, self.channel_name)
-
-            print("DEBUG: Grupa dodana, akceptuję połączenie...")
             await self.accept()
-            print("DEBUG: POŁĄCZONO!")
+            print(f"DEBUG: Użytkownik {self.user.email} (ID: {self.user.id}) połączony!")
 
         except Exception as e:
             # To pozwoli Ci zobaczyć w logach Dockera co naprawdę się stało
