@@ -1,12 +1,12 @@
 <div class="chat-layout">
 
   <aside class="matches">
-    <h3>Matche</h3>
+    <h3>Twoje pary</h3>
     <div
-      *ngFor="let m of matches"
+      *ngFor="let m of matches$ | async"
       (click)="selectUser(m)"
       class="match"
-      [class.active]="m === selectedUser"
+      [class.active]="selectedUser && m.id === selectedUser.id"
     >
       {{ m.first_name }}
     </div>
@@ -14,25 +14,35 @@
 
   <section class="chat">
     <ng-container *ngIf="selectedUser; else empty">
-      <h3>{{ selectedUser.first_name }}</h3>
+      <div class="chat-header">
+        <h3>{{ selectedUser.first_name }}</h3>
+        </div>
 
-      <div class="messages">
+      <div class="messages" #messagesContainer>
         <div
           *ngFor="let msg of messages"
           class="message"
+          [class.mine]="msg.sender.email === 'twoj_email@example.com' || msg.is_me"
         >
-          <b>{{ msg.sender.first_name }}:</b> {{ msg.content }}
+          <small>{{ msg.sender.first_name }}:</small>
+          <p>{{ msg.content }}</p>
         </div>
       </div>
 
       <div class="input">
-        <input [(ngModel)]="newMessage" placeholder="Napisz wiadomość..." />
+        <input
+          [(ngModel)]="newMessage"
+          (keyup.enter)="send()"
+          placeholder="Napisz wiadomość..."
+        />
         <button (click)="send()">Wyślij</button>
       </div>
     </ng-container>
 
     <ng-template #empty>
-      <p>Wybierz match, aby zacząć rozmowę</p>
+      <div class="empty-state">
+        <p>Wybierz match, aby zacząć rozmowę</p>
+      </div>
     </ng-template>
   </section>
 
