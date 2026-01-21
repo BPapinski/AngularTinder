@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewChecked, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChatService } from '../../services/chat.service';
 import { FormsModule } from '@angular/forms';
@@ -24,7 +24,10 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   // Do autoscrolla
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
 
-  constructor(private chatService: ChatService) {}
+  constructor(
+    private chatService: ChatService,
+    private cdr: ChangeDetectorRef,
+  ) {}
 
   ngOnInit() {
     this.chatService.getMatches().subscribe(res => {
@@ -37,6 +40,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     // Globalny nasłuch na nowe wiadomości z serwisu
     this.messagesSubscription = this.chatService.messages$.subscribe(msg => {
       this.messages.push(msg);
+      this.cdr.detectChanges();
       this.scrollToBottom();
     });
   }
@@ -59,6 +63,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
 
     this.chatService.getMessagesHistory(user.id).subscribe(res => {
       this.messages = res;
+      this.cdr.detectChanges();
       this.scrollToBottom();
     });
 
