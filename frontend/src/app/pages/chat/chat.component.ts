@@ -21,10 +21,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   private readonly BACKEND_URL = 'http://localhost:8000';
 
-  // Do obsługi subskrypcji strumienia wiadomości
   private messagesSubscription: Subscription | null = null;
 
-  // Do autoscrolla
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
 
   constructor(
@@ -41,7 +39,6 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   ngOnInit() {
     this.matches$ = this.chatService.getMatches();
 
-    // Globalny nasłuch na nowe wiadomości z serwisu
     this.messagesSubscription = this.chatService.messages$.subscribe(msg => {
       if (!this.selectedUser) {
         console.log('⏭️ Brak wybranego użytkownika, pomijam wiadomość');
@@ -52,7 +49,6 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
       const receiverId = Number(msg.receiver);
       const selectedUserId = this.selectedUser.id;
 
-      // Wiadomość dotyczy wybranego rozmówcy (od niego lub do niego)
       const isRelevant = senderId === selectedUserId || receiverId === selectedUserId;
 
       if (!isRelevant) {
@@ -63,9 +59,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
       const userIdFromUrl = this.route.snapshot.queryParams['userId'];
 
       if (userIdFromUrl && this.matches$) {
-        // Szukamy użytkownika o tym ID na liście
         const userToSelect$ = this.matches$.pipe(
-          // Wchodzimy do środka strumienia, gdzie jest tablica 'matches'
           map((matches$: any[]) => matches$.find(m => m.id == userIdFromUrl))
         );
 
@@ -85,8 +79,6 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   ngAfterViewChecked() {
-    // Opcjonalnie: automatyczne przewijanie w dół przy wejściu
-    // this.scrollToBottom();
   }
 
   getProfileImage(path: string | null): string {
@@ -125,7 +117,6 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   scrollToBottom(): void {
     try {
-      // Małe opóźnienie, aby Angular zdążył wyrenderować nowy element w DOM
       setTimeout(() => {
         if (this.messagesContainer) {
           this.messagesContainer.nativeElement.scrollTop = this.messagesContainer.nativeElement.scrollHeight;
@@ -135,7 +126,6 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   ngOnDestroy() {
-    // Sprzątanie połączeń przy wyjściu z czatu
     this.chatService.disconnect();
     if (this.messagesSubscription) {
       this.messagesSubscription.unsubscribe();

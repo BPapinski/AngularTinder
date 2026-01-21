@@ -4,7 +4,6 @@
   background: #f5f6f8;
 }
 
-/* ===== MATCHES ===== */
 .matches {
   width: 320px;
   padding: 16px;
@@ -65,7 +64,6 @@
   color: #bbb;
 }
 
-/* ===== CHAT ===== */
 .chat {
   flex: 1;
   display: flex;
@@ -89,7 +87,6 @@
   font-weight: 700;
 }
 
-/* ===== MESSAGES ===== */
 .messages {
   flex: 1;
   overflow-y: auto;
@@ -119,7 +116,6 @@
   color: #fff;
 }
 
-/* ===== INPUT ===== */
 .input {
   display: flex;
   gap: 10px;
@@ -146,7 +142,6 @@
   cursor: pointer;
 }
 
-/* ===== EMPTY ===== */
 .empty-state {
   margin-top: 80px;
   text-align: center;

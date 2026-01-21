@@ -8,7 +8,7 @@ User = get_user_model()
 
 class DatingCardSerializer(serializers.ModelSerializer):
     age = serializers.IntegerField(read_only=True)
-    profile_image = serializers.SerializerMethodField()  # <- zmiana
+    profile_image = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -33,7 +33,7 @@ class MatchSerializer(serializers.ModelSerializer):
         other_user = obj.user2 if obj.user1 == request.user else obj.user1
         return MatchUserSerializer(
             other_user,
-            context=self.context,  # TO JEST KLUCZOWE
+            context=self.context,
         ).data
 
 

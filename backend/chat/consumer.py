@@ -26,7 +26,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             print(f"DEBUG: Użytkownik {self.user.email} (ID: {self.user.id}) połączony!")
 
         except Exception as e:
-            # To pozwoli Ci zobaczyć w logach Dockera co naprawdę się stało
             print("CRITICAL ERROR IN CONNECT:", e)
             traceback.print_exc()
             await self.close()
@@ -68,7 +67,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         print(f"DEBUG CHAT_MESSAGE: Wysyłam wiadomość dla kanału {self.channel_name}: {event['message']}")
         await self.send(text_data=json.dumps(event["message"]))
 
-    # --- wszystkie ORM-owe wywołania w metodach ---
     @database_sync_to_async
     def check_match(self, u1, u2):
         from django.db.models import Q

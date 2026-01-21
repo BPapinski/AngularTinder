@@ -4,7 +4,6 @@ from users.models import User
 
 from .models import Interaction, Match
 
-# Funkcja do obsługi "like" i sprawdzania matchy
 
 
 def perform_like(sender, receiver):
@@ -26,18 +25,14 @@ def perform_like(sender, receiver):
         match, match_created = Match.objects.get_or_create(user1=u1, user2=u2)
         is_match = True
 
-        # Tu możesz wywołać powiadomienie (np. WebSocket lub Push)
-        # send_match_notification(match)
 
     return is_match
 
 
-# do wykonania "dislike"
 def perform_dislike(sender, receiver):
     Interaction.objects.update_or_create(user=sender, target_user=receiver, defaults={"action": Interaction.DISLIKE})
 
 
-# Funkcja do pobierania feedu randkowego
 
 
 def get_dating_feed(user):
@@ -45,11 +40,9 @@ def get_dating_feed(user):
 
     profiles = User.objects.exclude(id__in=interacted_users_ids).exclude(id=user.id)
 
-    # filtr płci
     if user.gender_preference != User.GenderPreference.ANY:
         profiles = profiles.filter(gender=user.gender_preference)
 
-    # filtr wieku
     today = date.today()
 
     if user.min_preferred_age is not None:

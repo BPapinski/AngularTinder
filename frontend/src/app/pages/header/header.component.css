@@ -1,4 +1,4 @@
-/* === Główny Kontener === */
+
 .app-header {
   position: sticky;
   top: 0;
@@ -18,11 +18,10 @@
   margin: 0 auto;
   padding: 0 24px;
   display: flex;
-  justify-content: space-between; /* Kluczowe: rozpycha elementy */
+  justify-content: space-between;
   align-items: center;
 }
 
-/* === 1. Logo === */
 .logo {
   font-family: 'Poppins', sans-serif;
   font-size: 24px;
@@ -33,10 +32,9 @@
 }
 
 .highlight {
-  color: #ff5864; /* Główny kolor aplikacji */
+  color: #ff5864;
 }
 
-/* === 2. Nawigacja środkowa === */
 .main-nav {
   display: flex;
   gap: 30px;
@@ -65,14 +63,12 @@
   background: rgba(255, 88, 100, 0.1);
 }
 
-/* Ukrywanie tekstów na bardzo małych ekranach (mobile) */
 @media (max-width: 768px) {
   .nav-text { display: none; }
   .logo { font-size: 20px; }
   .main-nav { gap: 10px; }
 }
 
-/* === 3. Sekcja Użytkownika & Dropdown === */
 .user-section {
   position: relative;
   min-width: 120px;
@@ -81,7 +77,7 @@
 }
 
 .user-dropdown-container {
-  position: relative; /* Ważne dla pozycjonowania menu */
+  position: relative;
   cursor: pointer;
   padding: 4px 0;
 }
@@ -122,10 +118,9 @@
   color: #999;
 }
 
-/* === Dropdown Menu (Logika Hover) === */
 .dropdown-menu {
   position: absolute;
-  top: 100%; /* Zaraz pod triggerem */
+  top: 100%;
   right: 0;
   width: 200px;
   background: white;
@@ -135,21 +130,19 @@
   padding: 8px;
   margin-top: 10px;
 
-  /* Ukryte domyślnie */
+
   opacity: 0;
   visibility: hidden;
   transform: translateY(-10px);
   transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
-/* Pokazujemy menu, gdy najedziemy na kontener */
 .user-dropdown-container:hover .dropdown-menu {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
 }
 
-/* Elementy w menu */
 .dropdown-item {
   display: block;
   padding: 12px 16px;
@@ -185,7 +178,6 @@
   background: #fff0f2;
 }
 
-/* === Przycisk Zaloguj (Dla niezalogowanych) === */
 .login-btn {
   background: linear-gradient(90deg, #ff5864, #ff8f5e);
   color: white;

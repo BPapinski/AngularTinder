@@ -58,12 +58,10 @@ export class MatchesComponent implements OnInit {
   isNew(match: MatchItem): boolean {
     const created = new Date(match.created_at).getTime();
     const now = Date.now();
-    return now - created < 24 * 60 * 60 * 1000; // 24h
+    return now - created < 24 * 60 * 60 * 1000;
   }
 
   goToChat(userId: number) {
-    // Zamiast ['/chat', id], używamy queryParams.
-    // Dzięki temu URL będzie wyglądał tak: /chat?userId=5
     this.router.navigate(['/chat'], { queryParams: { userId: userId } });
   }
 }

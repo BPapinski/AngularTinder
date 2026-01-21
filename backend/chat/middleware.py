@@ -1,4 +1,4 @@
-# chat/middleware.py
+
 
 from urllib.parse import parse_qs
 
@@ -8,12 +8,10 @@ from django.contrib.auth.models import AnonymousUser
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.tokens import AccessToken
 
-# USUNIĘTE: User = get_user_model() <- To powodowało błąd!
 
 
 @database_sync_to_async
 def get_user(user_id):
-    # DODANE: Importujemy model dopiero w momencie użycia, gdy Django jest gotowe
     from django.contrib.auth import get_user_model
 
     User = get_user_model()
@@ -34,7 +32,7 @@ class JWTAuthMiddleware(BaseMiddleware):
 
         if token:
             try:
-                access_token = AccessToken(token)  # type: ignore
+                access_token = AccessToken(token)
                 user_id = access_token["user_id"]
                 scope["user"] = await get_user(user_id)
                 print(f"DEBUG MIDDLEWARE: User zalogowany, ID: {user_id}")

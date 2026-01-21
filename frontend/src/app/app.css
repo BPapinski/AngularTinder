@@ -1,4 +1,4 @@
-/* Dodaj to na samej górze pliku stylów globalnych */
+
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
 
 :root {
@@ -14,7 +14,7 @@ body {
   margin: 0;
   font-family: 'Poppins', sans-serif;
   background-color: #f5f7fa;
-  overflow-x: hidden; /* Zapobiega poziomemu przewijaniu */
+  overflow-x: hidden;
 }
 
 * {

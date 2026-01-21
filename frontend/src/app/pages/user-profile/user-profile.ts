@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms'; // <--- NOWE IMPORTY
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService, UserProfile } from '../../services/auth.service';
 
 @Component({
@@ -42,11 +42,11 @@ export class UserProfileComponent implements OnInit {
         next: (data) => {
           this.user = data;
           this.loading = false;
-          this.cdr.detectChanges(); // 3. <--- KLUCZOWA ZMIANA: Wymuś odświeżenie widoku
+          this.cdr.detectChanges();
         },
         error: () => {
           this.loading = false;
-          this.cdr.detectChanges(); // Wymuś też przy błędzie
+          this.cdr.detectChanges();
         }
       });
     }
@@ -57,8 +57,6 @@ export class UserProfileComponent implements OnInit {
       first_name: ['', [Validators.required, Validators.minLength(2)]],
       bio: ['', [Validators.maxLength(500)]],
       gender: [''],
-      // Email i Wiek zazwyczaj są read-only lub walidowane inaczej,
-      // więc ich tu nie dajemy do edycji, chyba że backend pozwala.
     });
   }
 
@@ -87,7 +85,6 @@ export class UserProfileComponent implements OnInit {
     if (file) {
       this.selectedFile = file;
 
-      // Podgląd obrazka przed wysłaniem
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.previewUrl = e.target.result;
@@ -103,12 +100,10 @@ export class UserProfileComponent implements OnInit {
     this.submitting = true;
     const formData = new FormData();
 
-    // Dodajemy pola tekstowe
     formData.append('first_name', this.editForm.get('first_name')?.value);
     formData.append('bio', this.editForm.get('bio')?.value || '');
     formData.append('gender', this.editForm.get('gender')?.value);
 
-    // Dodajemy plik tylko jeśli został wybrany
     if (this.selectedFile) {
       formData.append('profile_image', this.selectedFile);
     }
@@ -134,17 +129,16 @@ export class UserProfileComponent implements OnInit {
       next: (data) => {
         this.user = data;
         this.loading = false;
-        this.cdr.detectChanges(); // 3. <--- KLUCZOWA ZMIANA
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Błąd pobierania profilu', err);
         this.loading = false;
-        this.cdr.detectChanges(); // Wymuś też przy błędzie
+        this.cdr.detectChanges();
       }
     });
   }
 
-  // Reszta metod bez zmian (checkIfOwnProfile, getProfileImageUrl, etc.)
   checkIfOwnProfile(visitedId: number) {
     const currentUser = this.authService.currentUser();
     if (currentUser && currentUser.id === visitedId) {
@@ -155,7 +149,6 @@ export class UserProfileComponent implements OnInit {
   }
 
   getProfileImageUrl(): string {
-    // Tutaj zmienimy logikę w Kroku 2, żeby naprawić błąd 404
     if (!this.user || !this.user.profile_image) {
       return 'assets/placeholder-user.png';
     }

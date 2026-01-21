@@ -8,7 +8,6 @@ from .managers import UserManager
 
 
 def user_directory_path(instance, filename):
-    # Plik zapisany w: MEDIA_ROOT/profile_images/<user_id>/<filename>
     return f"profile_images/user_{instance.id}/{filename}"
 
 
