@@ -80,6 +80,7 @@ export class HomeComponent implements OnInit {
             // Jeśli to nie tablica (np. obiekt z komunikatem), uznajemy że lista jest pusta
             this.profiles = [];
           }
+        this.loading = false;
       },
       error: (err) => {
         console.error('FEED ERROR', err);
