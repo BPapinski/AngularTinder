@@ -27,5 +27,6 @@ repos:
             'drf-spectacular',
             'djangorestframework-simplejwt',
             'django-cors-headers',
-            'Pillow'
+            'Pillow',
+            'channels'
         ]
