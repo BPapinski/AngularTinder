@@ -58,7 +58,10 @@ class UserProfileView(GenericAPIView):
 
         # Zabezpieczenie: Czy próbujesz edytować kogoś innego?
         if user.id != request.user.id:
-            return Response({"detail": "Nie możesz edytować cudzego profilu."}, status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {"detail": "Nie możesz edytować cudzego profilu."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
         # partial=True pozwala przesłać tylko wybrane pola
         serializer = self.get_serializer(user, data=request.data, partial=True)
@@ -77,7 +80,10 @@ class UserProfileView(GenericAPIView):
 
         # Zabezpieczenie
         if user.id != request.user.id:
-            return Response({"detail": "Nie możesz edytować cudzego profilu."}, status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {"detail": "Nie możesz edytować cudzego profilu."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
         serializer = self.get_serializer(user, data=request.data)
 

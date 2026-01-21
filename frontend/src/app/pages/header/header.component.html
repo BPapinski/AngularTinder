@@ -36,14 +36,18 @@
 
     <div class="user-section">
 
-      <div class="user-dropdown-container" *ngIf="authService.isLoggedIn(); else loginBtn">
+      <div
+        class="user-dropdown-container"
+        *ngIf="authService.isLoggedIn(); else loginBtn"
+      >
 
         <div class="user-trigger">
           <img
             [src]="getProfileImageUrl()"
             class="user-avatar"
             alt="Avatar"
-            (error)="img.src='assets/placeholder-user.png'" #img
+            (error)="img.src='assets/placeholder-user.png'"
+            #img
           >
 
           <span class="user-name">
@@ -54,21 +58,35 @@
         </div>
 
         <div class="dropdown-menu">
-           <div class="menu-header" style="padding: 10px 16px; border-bottom: 1px solid #eee;">
-             <small style="color: #999;">Zalogowany jako:</small><br>
-             <strong>{{ user?.email }}</strong>
-           </div>
+          <div
+            class="menu-header"
+            style="padding: 10px 16px; border-bottom: 1px solid #eee;"
+          >
+            <small style="color: #999;">Zalogowany jako:</small><br>
+            <strong>{{ user?.email }}</strong>
+          </div>
 
-          <a routerLink="/profile" class="dropdown-item">👤 Twój Profil</a>
-          <a routerLink="/settings" class="dropdown-item">⚙️ Ustawienia</a>
+          <a routerLink="/profile" class="dropdown-item">
+            👤 Twój Profil
+          </a>
+
+          <a routerLink="/settings" class="dropdown-item">
+            ⚙️ Ustawienia
+          </a>
+
           <div class="divider"></div>
-          <button (click)="logout()" class="dropdown-item logout">🚪 Wyloguj się</button>
+
+          <button (click)="logout()" class="dropdown-item logout">
+            🚪 Wyloguj się
+          </button>
         </div>
 
       </div>
 
       <ng-template #loginBtn>
-        <a routerLink="/login" class="login-btn">Zaloguj się</a>
+        <a routerLink="/login" class="login-btn">
+          Zaloguj się
+        </a>
       </ng-template>
 
     </div>

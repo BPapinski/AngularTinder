@@ -1,0 +1,44 @@
+.chat-layout {
+  display: flex;
+  height: 80vh;
+}
+
+.matches {
+  width: 220px;
+  border-right: 1px solid #ddd;
+  padding: 10px;
+}
+
+.match {
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.match:hover,
+.match.active {
+  background: #ff4d6d;
+  color: white;
+}
+
+.chat {
+  flex: 1;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 10px;
+}
+
+.message {
+  margin-bottom: 6px;
+}
+
+.input {
+  display: flex;
+  gap: 10px;
+}
