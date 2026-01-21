@@ -22,9 +22,9 @@
         <div
           *ngFor="let msg of messages"
           class="message"
-          [class.mine]="msg.sender.email === 'twoj_email@example.com' || msg.is_me"
+          [class.mine]="msg.is_me"
         >
-          <small>{{ msg.sender.first_name }}:</small>
+          <small>{{ msg.sender?.first_name }}:</small>
           <p>{{ msg.content }}</p>
         </div>
       </div>

@@ -33,6 +33,7 @@ export class ChatService {
     const token = localStorage.getItem('access_token'); // lub pobierz z AuthService
     const wsUrl = `ws://127.0.0.1:8000/ws/chat/${otherUserId}/?token=${token}`;
 
+    console.log('🔗 Łączę się z WebSocketem:', wsUrl);
     this.socket = new WebSocket(wsUrl);
 
     this.socket.onopen = () => {
@@ -40,8 +41,9 @@ export class ChatService {
     };
 
     this.socket.onmessage = (event) => {
+      console.log('📩 ChatService otrzymała surowe dane z WS:', event.data);
       const data = JSON.parse(event.data);
-      console.log('📩 Otrzymano wiadomość:', data);
+      console.log('📩 ChatService parsowała wiadomość:', data);
       // Przekazujemy wiadomość do komponentu
       this.messageSubject.next(data);
     };

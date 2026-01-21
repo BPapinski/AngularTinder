@@ -30,16 +30,19 @@ class JWTAuthMiddleware(BaseMiddleware):
         query_params = parse_qs(query_string)
 
         token = query_params.get("token", [None])[0]
+        print(f"DEBUG MIDDLEWARE: Token obecny: {bool(token)}")
 
         if token:
             try:
                 access_token = AccessToken(token)  # type: ignore
                 user_id = access_token["user_id"]
                 scope["user"] = await get_user(user_id)
+                print(f"DEBUG MIDDLEWARE: User zalogowany, ID: {user_id}")
             except (InvalidToken, TokenError, Exception) as e:
                 print(f"JWT Auth Error: {e}")
                 scope["user"] = AnonymousUser()
         else:
             scope["user"] = AnonymousUser()
+            print("DEBUG MIDDLEWARE: Brak tokena, user anonimowy")
 
         return await super().__call__(scope, receive, send)

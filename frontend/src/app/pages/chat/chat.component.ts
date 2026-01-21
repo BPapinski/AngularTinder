@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ChatService } from '../../services/chat.service';
 import { FormsModule } from '@angular/forms';
 import { Subscription, Observable } from 'rxjs';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   standalone: true,
@@ -27,18 +28,42 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   constructor(
     private chatService: ChatService,
     private cdr: ChangeDetectorRef,
+    private authService: AuthService,
   ) {}
 
-  ngOnInit() {
-    this.chatService.getMatches().subscribe(res => {
-      // this.matches = res;
-      console.log('👥 Pobrani rozmówcy:', this.matches$);
-    });
+  get currentUser() {
+    return this.authService.currentUser();
+  }
 
+  ngOnInit() {
     this.matches$ = this.chatService.getMatches();
 
     // Globalny nasłuch na nowe wiadomości z serwisu
     this.messagesSubscription = this.chatService.messages$.subscribe(msg => {
+      console.log('📨 ChatComponent otrzymała wiadomość:', msg, 'selectedUser:', this.selectedUser);
+
+      // Filtrujemy tylko wiadomości dla wybranego użytkownika
+      if (!this.selectedUser) {
+        console.log('⏭️ Brak wybranego użytkownika, pomijam wiadomość');
+        return;
+      }
+
+      const senderId = msg.sender?.id;
+      const receiverId = Number(msg.receiver);
+      const selectedUserId = this.selectedUser.id;
+
+      // Wiadomość dotyczy wybranego rozmówcy (od niego lub do niego)
+      const isRelevant = senderId === selectedUserId || receiverId === selectedUserId;
+
+      if (!isRelevant) {
+        console.log('⏭️ Wiadomość nie dotyczy wybranego użytkownika, pomijam');
+        return;
+      }
+
+      const me = this.authService.currentUser();
+      msg.is_me = me ? msg.sender?.id === me.id : false;
+
+      console.log('✅ Dodaję wiadomość do tablicy:', msg);
       this.messages.push(msg);
       this.cdr.detectChanges();
       this.scrollToBottom();
@@ -61,8 +86,16 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.selectedUser = user;
     this.messages = [];
 
+
+
     this.chatService.getMessagesHistory(user.id).subscribe(res => {
-      this.messages = res;
+      const me = this.authService.currentUser();
+
+      this.messages = res.map(msg => ({
+        ...msg,
+        is_me: me ? msg.sender.id === me.id : false
+      }));
+
       this.cdr.detectChanges();
       this.scrollToBottom();
     });
