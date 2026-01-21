@@ -1,6 +1,7 @@
 from rest_framework import serializers
-from .models import ChatMessage
 from users.models import User
+
+from .models import ChatMessage
 
 
 class UserShortSerializer(serializers.ModelSerializer):
