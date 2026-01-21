@@ -22,7 +22,7 @@
           <div
             class="match-row"
             *ngFor="let match of matches; trackBy: trackById"
-            (click)="goToChat(match.id)"
+            (click)="goToChat(match.user.id)"
           >
 
             <div class="avatar">

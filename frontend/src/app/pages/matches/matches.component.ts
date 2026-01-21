@@ -61,7 +61,9 @@ export class MatchesComponent implements OnInit {
     return now - created < 24 * 60 * 60 * 1000; // 24h
   }
 
-  goToChat(id: number) {
-    this.router.navigate(['/chat', id]);
+  goToChat(userId: number) {
+    // Zamiast ['/chat', id], używamy queryParams.
+    // Dzięki temu URL będzie wyglądał tak: /chat?userId=5
+    this.router.navigate(['/chat'], { queryParams: { userId: userId } });
   }
 }

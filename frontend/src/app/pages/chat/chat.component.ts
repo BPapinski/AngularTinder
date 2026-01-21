@@ -4,6 +4,7 @@ import { ChatService } from '../../services/chat.service';
 import { FormsModule } from '@angular/forms';
 import { Subscription, Observable } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   standalone: true,
@@ -29,6 +30,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     private chatService: ChatService,
     private cdr: ChangeDetectorRef,
     private authService: AuthService,
+    private route: ActivatedRoute,
   ) {}
 
   get currentUser() {
@@ -40,9 +42,6 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
 
     // Globalny nasłuch na nowe wiadomości z serwisu
     this.messagesSubscription = this.chatService.messages$.subscribe(msg => {
-      console.log('📨 ChatComponent otrzymała wiadomość:', msg, 'selectedUser:', this.selectedUser);
-
-      // Filtrujemy tylko wiadomości dla wybranego użytkownika
       if (!this.selectedUser) {
         console.log('⏭️ Brak wybranego użytkownika, pomijam wiadomość');
         return;
@@ -58,6 +57,17 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
       if (!isRelevant) {
         console.log('⏭️ Wiadomość nie dotyczy wybranego użytkownika, pomijam');
         return;
+      }
+
+      const userIdFromUrl = this.route.snapshot.queryParams['userId'];
+
+      if (userIdFromUrl && this.matches$) {
+        // Szukamy użytkownika o tym ID na liście
+        const userToSelect = this.matches$.find(m => m.id == userIdFromUrl);
+
+        if (userToSelect) {
+          this.selectUser(userToSelect);
+        }
       }
 
       const me = this.authService.currentUser();
