@@ -5,7 +5,6 @@ from users.models import User
 from .models import Interaction, Match
 
 
-
 def perform_like(sender, receiver):
     interaction, created = Interaction.objects.update_or_create(
         user=sender, target_user=receiver, defaults={"action": Interaction.LIKE}
@@ -25,14 +24,11 @@ def perform_like(sender, receiver):
         match, match_created = Match.objects.get_or_create(user1=u1, user2=u2)
         is_match = True
 
-
     return is_match
 
 
 def perform_dislike(sender, receiver):
     Interaction.objects.update_or_create(user=sender, target_user=receiver, defaults={"action": Interaction.DISLIKE})
-
-
 
 
 def get_dating_feed(user):

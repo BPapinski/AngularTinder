@@ -1,5 +1,3 @@
-
-
 from urllib.parse import parse_qs
 
 from channels.db import database_sync_to_async
@@ -7,7 +5,6 @@ from channels.middleware import BaseMiddleware
 from django.contrib.auth.models import AnonymousUser
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.tokens import AccessToken
-
 
 
 @database_sync_to_async
@@ -32,7 +29,7 @@ class JWTAuthMiddleware(BaseMiddleware):
 
         if token:
             try:
-                access_token = AccessToken(token)
+                access_token = AccessToken(token)  # type: ignore[arg-type]
                 user_id = access_token["user_id"]
                 scope["user"] = await get_user(user_id)
                 print(f"DEBUG MIDDLEWARE: User zalogowany, ID: {user_id}")
