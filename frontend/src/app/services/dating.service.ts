@@ -1,10 +1,10 @@
-// src/app/services/dating.service.ts
+
 
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, timeout } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { AuthService } from './auth.service'; // Pamiętaj o imporcie AuthService
+import { AuthService } from './auth.service';
 
 export interface DatingProfile {
   id: number;

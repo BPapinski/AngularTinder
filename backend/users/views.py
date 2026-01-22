@@ -32,7 +32,6 @@ class UserProfileView(GenericAPIView):
 
     permission_classes = [IsAuthenticated]
     serializer_class = UserProfileSerializer
-    # Parsery są kluczowe, aby Swagger pozwolił przesyłać pliki (zdjęcia) oraz JSON
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_object(self, user_id=None):
@@ -56,14 +55,12 @@ class UserProfileView(GenericAPIView):
         """
         user = self.get_object(user_id)
 
-        # Zabezpieczenie: Czy próbujesz edytować kogoś innego?
         if user.id != request.user.id:
             return Response(
                 {"detail": "Nie możesz edytować cudzego profilu."},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        # partial=True pozwala przesłać tylko wybrane pola
         serializer = self.get_serializer(user, data=request.data, partial=True)
 
         if serializer.is_valid():
@@ -78,7 +75,6 @@ class UserProfileView(GenericAPIView):
         """
         user = self.get_object(user_id)
 
-        # Zabezpieczenie
         if user.id != request.user.id:
             return Response(
                 {"detail": "Nie możesz edytować cudzego profilu."},

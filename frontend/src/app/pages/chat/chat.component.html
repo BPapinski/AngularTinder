@@ -1,38 +1,60 @@
 <div class="chat-layout">
 
   <aside class="matches">
-    <h3>Matche</h3>
-    <div
-      *ngFor="let m of matches"
-      (click)="selectUser(m)"
-      class="match"
-      [class.active]="m === selectedUser"
-    >
-      {{ m.first_name }}
+  <h3 class="matches-title">Twoje pary</h3>
+
+  <div
+    *ngFor="let m of matches$ | async"
+    class="match-row"
+    [class.active]="selectedUser && m.id === selectedUser.id"
+    (click)="selectUser(m)"
+  >
+    <div class="avatar">
+      <img [src]="getProfileImage(m.profile_image)" />
     </div>
-  </aside>
+
+    <div class="info">
+      <div class="name">{{ m.first_name }}</div>
+      <div class="sub">Kliknij aby otworzyć czat</div>
+    </div>
+
+    <div class="chevron">›</div>
+  </div>
+</aside>
 
   <section class="chat">
     <ng-container *ngIf="selectedUser; else empty">
-      <h3>{{ selectedUser.first_name }}</h3>
+      <div class="chat-header">
+  <div class="avatar small">
+    <img [src]="getProfileImage(selectedUser.profile_image)" />
+  </div>
+  <h3>{{ selectedUser.first_name }}</h3>
+</div>
 
-      <div class="messages">
-        <div
-          *ngFor="let msg of messages"
-          class="message"
-        >
-          <b>{{ msg.sender.first_name }}:</b> {{ msg.content }}
-        </div>
-      </div>
+      <div class="messages" #messagesContainer>
+  <div
+    *ngFor="let msg of messages"
+    class="bubble"
+    [class.mine]="msg.is_me"
+  >
+    {{ msg.content }}
+  </div>
+</div>
 
       <div class="input">
-        <input [(ngModel)]="newMessage" placeholder="Napisz wiadomość..." />
+        <input
+          [(ngModel)]="newMessage"
+          (keyup.enter)="send()"
+          placeholder="Napisz wiadomość..."
+        />
         <button (click)="send()">Wyślij</button>
       </div>
     </ng-container>
 
     <ng-template #empty>
-      <p>Wybierz match, aby zacząć rozmowę</p>
+      <div class="empty-state">
+        <p>Wybierz match, aby zacząć rozmowę</p>
+      </div>
     </ng-template>
   </section>
 

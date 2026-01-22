@@ -1,9 +1,7 @@
-/* === Layout główny (Jasne tło jak w profilu) === */
+
 .home-container {
-  /* Fix dla mobile: pełna wysokość minus header */
   height: calc(100vh - 55px);
 
-  /* ZMIANA: Zamiast gradientu, dajemy jasne tło jak w profilu */
   background: #f0f2f5;
 
   display: flex;
@@ -15,7 +13,6 @@
   font-family: 'Poppins', sans-serif;
 }
 
-/* === Stany (Loading, Empty, Login) - ZMIANA NA CIEMNY TEKST === */
 .state-container {
   display: flex;
   flex-direction: column;
@@ -24,7 +21,7 @@
   text-align: center;
   padding: 20px;
   animation: fadeIn 0.5s ease-out;
-  color: #333; /* ZMIANA: Ciemny tekst, bo tło jest jasne */
+  color: #333;
 }
 
 .empty-icon {
@@ -45,10 +42,9 @@
   max-width: 320px;
   line-height: 1.5;
   margin-bottom: 30px;
-  color: #666; /* Szary tekst dla lepszej czytelności */
+  color: #666;
 }
 
-/* === Karty (Feed) === */
 .cards-stack {
   position: relative;
   width: 92%;
@@ -64,7 +60,6 @@
   height: 100%;
   border-radius: 20px;
   background: white;
-  /* Delikatniejszy cień na jasnym tle */
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
   overflow: hidden;
   cursor: grab;
@@ -77,7 +72,6 @@
   cursor: grabbing;
 }
 
-/* === Obrazek i Overlay === */
 .card-image-wrapper {
   position: relative;
   width: 100%;
@@ -103,7 +97,6 @@
   color: #aaa;
 }
 
-/* Overlay - gradient na dole zdjęcia (bez zmian) */
 .card-overlay {
   position: absolute;
   bottom: 0;
@@ -114,14 +107,13 @@
   pointer-events: none;
 }
 
-/* === Treść na karcie (Tekst na zdjęciu - musi być BIAŁY) === */
 .card-content {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
   padding: 20px;
-  color: white; /* Tekst na karcie pozostaje biały */
+  color: white;
   display: flex;
   flex-direction: column;
 }
@@ -150,7 +142,6 @@
   overflow: hidden;
 }
 
-/* === Przyciski Akcji (Pass/Smash) === */
 .action-buttons {
   display: flex;
   justify-content: center;
@@ -169,7 +160,7 @@
   align-items: center;
   justify-content: center;
   transition: transform 0.2s, background 0.2s;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.15); /* Lżejszy cień */
+  box-shadow: 0 6px 15px rgba(0,0,0,0.15);
 }
 
 .btn-circle:hover { transform: scale(1.1); }
@@ -185,9 +176,7 @@
   color: #2ecc71;
 }
 
-/* === Główny Przycisk (np. Odśwież / Zaloguj) - ZMIANA STYLU === */
 .action-btn {
-  /* ZMIANA: Teraz przycisk ma gradient, bo tło strony jest jasne */
   background: linear-gradient(90deg, #ff5864, #ff8f5e);
   color: white;
   border: none;
@@ -196,7 +185,7 @@
   font-weight: 700;
   font-size: 16px;
   cursor: pointer;
-  box-shadow: 0 8px 20px rgba(255, 88, 100, 0.3); /* Cień w kolorze przycisku */
+  box-shadow: 0 8px 20px rgba(255, 88, 100, 0.3);
   transition: transform 0.2s;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -208,11 +197,10 @@
 }
 .action-btn:active { transform: translateY(1px); }
 
-/* === Animacja ładowania - ZMIANA KOLORU === */
 .pulse-circle {
   width: 50px;
   height: 50px;
-  background: #ff5864; /* ZMIANA: Kolorowe kółko na jasnym tle */
+  background: #ff5864;
   border-radius: 50%;
   margin-bottom: 20px;
   animation: pulse 1.5s infinite;

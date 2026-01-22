@@ -40,7 +40,6 @@ export class RegisterComponent {
     this.loading.set(true);
     this.errorMessage.set('');
 
-    // 🔹 Używamy HttpClient.post bezpośrednio
     this.http.post('/users/register/', this.registerForm.value)
       .subscribe({
         next: () => {

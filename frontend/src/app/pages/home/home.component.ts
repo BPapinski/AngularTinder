@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core'; // 1. Import
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router, RouterModule  } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
@@ -16,14 +16,13 @@ export class HomeComponent implements OnInit {
   profiles: DatingProfile[] = [];
   loading = false;
 
-  // ===== SWIPE STATE =====
   startX = 0;
   translateX = 0;
   rotate = 0;
   isDragging = false;
 
   readonly SWIPE_THRESHOLD = 120;
-  readonly USE_MOCKS = false; //  Set to true to use mock profiles
+  readonly USE_MOCKS = false;
 
   constructor(
     public authService: AuthService,
@@ -43,9 +42,6 @@ export class HomeComponent implements OnInit {
     }
   }
 
-  // ======================
-  // MOCK PROFILES
-  // ======================
   loadMockProfiles() {
     this.profiles = [
       { id: 1, first_name: 'Anna', age: 24, bio: 'Kawa i podróże ☕✈️', profile_image: null },
@@ -56,9 +52,6 @@ export class HomeComponent implements OnInit {
     ] as DatingProfile[];
   }
 
-  // ======================
-  // BACKEND FEED
-  // ======================
   loadFeed() {
   this.loading = true;
   this.profiles = [];
@@ -77,7 +70,6 @@ export class HomeComponent implements OnInit {
         if (Array.isArray(profiles)) {
             this.profiles = profiles;
           } else {
-            // Jeśli to nie tablica (np. obiekt z komunikatem), uznajemy że lista jest pusta
             this.profiles = [];
           }
         this.loading = false;
@@ -88,14 +80,11 @@ export class HomeComponent implements OnInit {
         this.loading = false;
       },
       complete: () => {
-        this.cdr.detectChanges();           // opcjonalnie, zwykle nie trzeba
+        this.cdr.detectChanges();
       }
     });
 }
 
-  // ======================
-  // SWIPE
-  // ======================
   onPointerDown(event: PointerEvent) {
     this.isDragging = true;
     this.startX = event.clientX;
@@ -158,9 +147,6 @@ export class HomeComponent implements OnInit {
     this.rotate = 0;
   }
 
-  // ======================
-  // NAVIGATION
-  // ======================
   goToProfile() {
     this.router.navigate(['/profile']);
   }

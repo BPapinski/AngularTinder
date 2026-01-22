@@ -1,44 +1,149 @@
 .chat-layout {
   display: flex;
-  height: 80vh;
+  height: calc(100vh - 55px);
+  background: #f5f6f8;
 }
 
 .matches {
-  width: 220px;
-  border-right: 1px solid #ddd;
-  padding: 10px;
+  width: 320px;
+  padding: 16px;
+  overflow-y: auto;
 }
 
-.match {
-  padding: 8px;
+.matches-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.match-row {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.08);
   cursor: pointer;
-  border-radius: 6px;
+  margin-bottom: 14px;
+  transition: transform .1s ease, box-shadow .1s ease;
 }
 
-.match:hover,
-.match.active {
-  background: #ff4d6d;
-  color: white;
+.match-row.active {
+  outline: 2px solid #ff4d6d;
+}
+
+.match-row:active {
+  transform: scale(0.97);
+}
+
+.avatar img {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.info {
+  flex: 1;
+  margin-left: 14px;
+}
+
+.name {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.sub {
+  font-size: 13px;
+  color: #777;
+  margin-top: 4px;
+}
+
+.chevron {
+  font-size: 28px;
+  color: #bbb;
 }
 
 .chat {
   flex: 1;
-  padding: 10px;
   display: flex;
   flex-direction: column;
+  padding: 16px;
+}
+
+.chat-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+  margin-bottom: 12px;
+}
+
+.chat-header h3 {
+  font-size: 18px;
+  font-weight: 700;
 }
 
 .messages {
   flex: 1;
   overflow-y: auto;
-  margin-bottom: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.message {
-  margin-bottom: 6px;
+.bubble {
+  width: fit-content;
+  max-width: 65%;
+  min-width: 120px;
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+  font-size: 14px;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+
+.bubble.mine {
+  align-self: flex-end;
+  background: #ff4d6d;
+  color: #fff;
 }
 
 .input {
   display: flex;
   gap: 10px;
+  padding: 12px;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+}
+
+.input input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 14px;
+}
+
+.input button {
+  background: #ff4d6d;
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  padding: 0 18px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.empty-state {
+  margin-top: 80px;
+  text-align: center;
+  color: #777;
 }
