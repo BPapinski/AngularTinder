@@ -4,6 +4,7 @@ import { RouterModule, Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { DatingService } from '../../services/dating.service';
+import { LoginPromptComponent } from '../../components/login-prompt/login-prompt.component';
 
 export interface MatchItem {
   id: number;
@@ -19,7 +20,7 @@ export interface MatchItem {
 @Component({
   selector: 'app-matches',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, LoginPromptComponent],
   templateUrl: './matches.component.html',
   styleUrls: ['./matches.component.css'],
 })

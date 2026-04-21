@@ -1,0 +1,60 @@
+.state-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px;
+  animation: fadeIn 0.5s ease-out;
+  color: #333;
+}
+
+.state-container h1 {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 10px;
+  color: #222;
+}
+
+.state-container p {
+  font-size: 16px;
+  max-width: 320px;
+  line-height: 1.5;
+  margin-bottom: 30px;
+  color: #666;
+}
+
+.action-btn {
+  background: linear-gradient(90deg, #ff5864, #ff8f5e);
+  color: white;
+  border: none;
+  padding: 14px 40px;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(255, 88, 100, 0.3);
+  transition: transform 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 25px rgba(255, 88, 100, 0.4);
+}
+
+.action-btn:active {
+  transform: translateY(1px);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

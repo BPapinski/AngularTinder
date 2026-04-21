@@ -6,10 +6,11 @@ import { Subscription, Observable } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { ActivatedRoute } from '@angular/router';
 import { map } from 'rxjs/operators';
+import { LoginPromptComponent } from '../../components/login-prompt/login-prompt.component';
 
 @Component({
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LoginPromptComponent],
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.css']
 })

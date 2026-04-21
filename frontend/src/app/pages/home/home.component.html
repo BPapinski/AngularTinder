@@ -73,10 +73,6 @@
   </ng-container>
 
   <ng-template #loginButton>
-    <div class="state-container">
-      <h1>Witaj!</h1>
-      <p>Zaloguj się, aby zacząć poznawać ludzi.</p>
-      <button class="action-btn" (click)="login()">Zaloguj się</button>
-    </div>
+    <app-login-prompt></app-login-prompt>
   </ng-template>
 </div>

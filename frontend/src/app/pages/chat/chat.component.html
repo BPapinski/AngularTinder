@@ -1,7 +1,14 @@
+<ng-container *ngIf="currentUser; else loginTpl">
 <div class="chat-layout">
 
   <aside class="matches">
   <h3 class="matches-title">Twoje pary</h3>
+
+  <div *ngIf="(matches$ | async)?.length === 0" class="empty-matches">
+    <div class="empty-icon">💔</div>
+    <h4>Brak matchów</h4>
+    <p>Kontynuuj odkrywanie, aby znaleźć kogoś do rozmowy!</p>
+  </div>
 
   <div
     *ngFor="let m of matches$ | async"
@@ -59,3 +66,10 @@
   </section>
 
 </div>
+</ng-container>
+
+<ng-template #loginTpl>
+  <div class="chat-layout centered">
+    <app-login-prompt title="Czaty" description="Zaloguj się, aby rozmawiać ze swoimi parami."></app-login-prompt>
+  </div>
+</ng-template>

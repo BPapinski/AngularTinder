@@ -3,12 +3,13 @@ import { Router, RouterModule  } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
 import { DatingService, DatingProfile } from '../../services/dating.service';
+import { LoginPromptComponent } from '../../components/login-prompt/login-prompt.component';
 import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule ],
+  imports: [CommonModule, RouterModule, LoginPromptComponent],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css'],
 })

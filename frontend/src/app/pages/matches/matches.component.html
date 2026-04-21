@@ -3,7 +3,7 @@
 
     <div class="content">
 
-      <div class="header">
+      <div class="header" *ngIf="matches.length > 0">
         <h2 class="title">✨ Twoje pary</h2>
         <p class="subtitle">Osoby, z którymi możesz zacząć rozmowę</p>
       </div>
@@ -14,40 +14,38 @@
 
       <ng-template #listTpl>
 
-        <div *ngIf="matches.length === 0" class="empty">
-          Nie masz jeszcze matchy 💔
+        <div *ngIf="matches.length === 0" class="empty-state">
+          <div class="empty-icon">💔</div>
+          <h2>Brak matchów</h2>
+          <p>Kontynuuj odkrywanie, aby znaleźć swoją drugą połówkę!</p>
+          <button class="action-btn" routerLink="/">Kontynuuj odkrywanie</button>
         </div>
 
-        <div class="matches-list" *ngIf="matches.length > 0">
+        <div class="matches-grid" *ngIf="matches.length > 0">
           <div
-            class="match-row"
-            *ngFor="let match of matches; trackBy: trackById"
+            class="match-card"
+            *ngFor="let match of matches; trackBy: trackById; let i = index"
+            [style.animation-delay.ms]="i * 100"
             (click)="goToChat(match.user.id)"
           >
 
-            <div class="avatar">
+            <div class="card-image">
               <img *ngIf="match.user.profile_image; else placeholder"
-                   [src]="match.user.profile_image">
+                   [src]="match.user.profile_image"
+                   alt="Profile">
               <ng-template #placeholder>
                 <div class="placeholder-img">
                   {{ match.user.first_name.charAt(0) }}
                 </div>
               </ng-template>
-
-              <span *ngIf="isNew(match)" class="badge">NOWY</span>
+              <div class="card-overlay"></div>
             </div>
 
-            <div class="info">
-              <div class="name">
-                {{ match.user.first_name }}
-                <span *ngIf="match.user.age">, {{ match.user.age }}</span>
-              </div>
-              <div class="sub">
-                Kliknij aby rozpocząć rozmowę
-              </div>
+            <div class="card-info">
+              <h3>{{ match.user.first_name }} <span *ngIf="match.user.age">, {{ match.user.age }}</span></h3>
+              <p>Kliknij aby rozpocząć rozmowę</p>
             </div>
 
-            <div class="chevron">›</div>
           </div>
         </div>
 
@@ -57,6 +55,6 @@
   </ng-container>
 
   <ng-template #loginTpl>
-    <button routerLink="/login">Zaloguj się</button>
+    <app-login-prompt title="Twoje pary" description="Zaloguj się, aby zobaczyć swoje matche."></app-login-prompt>
   </ng-template>
 </div>
