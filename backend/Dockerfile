@@ -20,7 +20,9 @@ RUN rm -f data/db.sqlite3
 
 RUN python manage.py migrate
 RUN python manage.py collectstatic --noinput
-RUN python manage.py create_sample_users
+
+# Always run - this ensures admin is created even after manual deletion
+ARG CACHE_BUST=1
 RUN python manage.py create_sample_users
 
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

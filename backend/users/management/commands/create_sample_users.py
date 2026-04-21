@@ -1,4 +1,4 @@
-﻿from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand
 from users.models import User
 from datetime import date
 
@@ -6,6 +6,7 @@ class Command(BaseCommand):
     help = 'Create sample users for testing'
 
     def handle(self, *args, **options):
+        self.stdout.write('Starting create_sample_users command...')
         # Delete existing sample users first
         sample_emails = [
             'admin@admin.com',
