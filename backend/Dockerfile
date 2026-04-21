@@ -15,7 +15,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
+RUN mkdir -p data
+RUN rm -f data/db.sqlite3
+
 RUN python manage.py migrate
 RUN python manage.py collectstatic --noinput
+RUN python manage.py create_sample_users
+RUN python manage.py create_sample_users
 
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

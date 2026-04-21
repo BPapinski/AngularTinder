@@ -4,6 +4,7 @@ services:
     build: ./backend
     volumes:
       - ./backend:/app
+      - ./backend/data:/app/data
       - ./pyproject.toml:/app/pyproject.toml
     ports:
       - "8000:8000"
