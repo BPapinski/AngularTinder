@@ -12,7 +12,7 @@ services:
       - DJANGO_SECRET_KEY=zmien_mnie_na_super_tajny_klucz_dla_dev
       - DJANGO_SETTINGS_MODULE=config.settings
       - REDIS_HOST=redis
-    command: daphne -b 0.0.0.0 -p 8000 config.asgi:application
+    command: python manage.py runserver 0.0.0.0:8000
     depends_on:
       - redis
 
