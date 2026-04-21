@@ -22,7 +22,10 @@ jobs:
       - name: Install Ruff
         run: pip install ruff
 
-      - name: Run Ruff Linter
+      - name: Fix Ruff issues
+        run: ruff check --fix ./backend
+
+      - name: Run Ruff
         run: ruff check ./backend --output-format=github
 
       - name: Check Code Formatting

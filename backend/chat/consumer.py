@@ -70,7 +70,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def check_match(self, u1, u2):
         from django.db.models import Q
-
         from interactions.models import Match
 
         return (

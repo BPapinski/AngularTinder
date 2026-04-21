@@ -1,10 +1,9 @@
 from django.db.models import Q
+from interactions.models import Match
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
-from interactions.models import Match
 from users.models import User
 
 from .models import ChatMessage
