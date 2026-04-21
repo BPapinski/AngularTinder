@@ -46,19 +46,29 @@ docker-compose up --build
 ```
 Pierwszy build może zająć kilka minut. Po uruchomieniu zobaczysz logi Django i Angulara.
 
-### 4. Skonfiguruj bazę danych
-Otwórz nowe okno terminala i wykonaj migracje Django:
+### 4. Konto administratora i migracje (automatyczne)
+
+**Migracje bazy danych i konto admina (`admin@admin.com` / `admin`) są tworzone automatycznie** podczas startu aplikacji.
+
+Jeśli z jakiegoś powodu migracje lub konto nie zostało utworzone, możesz je stworzyć ręcznie:
+
+#### Wykonanie migracji (jeśli nie zostały zastosowane automatycznie):
 ```bash
 docker-compose exec backend python manage.py migrate
 ```
-Stwórz konto administratora:
+
+#### Stworzenie konta administratora ręcznie:
 ```bash
 docker-compose exec backend python manage.py createsuperuser
-
-Wskazówka: Formularz logowania posiada domyślne autouzupełnianie dla poniższych danych, co przyspiesza testowanie:
-Email: admin@admin.com
-Hasło: admin
 ```
+lub użyj komendy do tworzenia przykładowych użytkowników:
+```bash
+docker-compose exec backend python manage.py create_sample_users
+```
+
+> **Wskazówka:** Formularz logowania posiada domyślne autouzupełnianie dla poniższych danych, co przyspiesza testowanie:
+> - Email: `admin@admin.com`
+> - Hasło: `admin`
 
 ---
 
