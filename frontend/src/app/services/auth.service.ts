@@ -25,6 +25,9 @@ export interface UserProfile {
   bio?: string;
   profile_image?: string;
   created_at?: string;
+  gender_preference?: string;
+  min_preferred_age?: number | null;
+  max_preferred_age?: number | null;
 }
 
 @Injectable({

@@ -14,6 +14,7 @@
       <div class="header-overlay"></div>
     </div>
 
+    <!-- ===== TRYB PODGLĄDU ===== -->
     <ng-container *ngIf="!isEditing; else editModeTemplate">
 
       <div class="card-identity">
@@ -32,7 +33,7 @@
           <span class="age-badge" *ngIf="user.age">{{ user.age }}</span>
         </h1>
         <p class="subtitle" *ngIf="user.created_at">
-           W aplikacji od {{ user.created_at | date:'yyyy' }}
+          W aplikacji od {{ user.created_at | date:'yyyy' }}
         </p>
       </div>
 
@@ -58,6 +59,20 @@
             </div>
           </div>
           <div class="info-item" *ngIf="isOwnProfile">
+            <span class="icon">💘</span>
+            <div class="text">
+              <span class="label">Szukam</span>
+              <span class="val">{{ getGenderPreferenceLabel(user.gender_preference) }}</span>
+            </div>
+          </div>
+          <div class="info-item" *ngIf="isOwnProfile && (user.min_preferred_age || user.max_preferred_age)">
+            <span class="icon">📅</span>
+            <div class="text">
+              <span class="label">Wiek partnera</span>
+              <span class="val">{{ user.min_preferred_age || '?' }}–{{ user.max_preferred_age || '?' }} lat</span>
+            </div>
+          </div>
+          <div class="info-item" *ngIf="isOwnProfile">
             <span class="icon">✉️</span>
             <div class="text">
               <span class="label">Email</span>
@@ -80,6 +95,7 @@
       </div>
     </ng-container>
 
+    <!-- ===== TRYB EDYCJI ===== -->
     <ng-template #editModeTemplate>
       <form [formGroup]="editForm" (ngSubmit)="saveProfile()" class="edit-form-container">
 
@@ -96,23 +112,86 @@
         <div class="card-body">
           <h2 class="edit-title">Edycja profilu</h2>
 
+          <!-- Sekcja: Dane podstawowe -->
+          <div class="section-label">Dane podstawowe</div>
+
           <div class="form-group">
             <label>Imię</label>
             <input type="text" formControlName="first_name" placeholder="Twoje imię">
+            <div class="field-error" *ngIf="editForm.get('first_name')?.invalid && editForm.get('first_name')?.touched">
+              <span *ngIf="editForm.get('first_name')?.errors?.['required']">Imię jest wymagane.</span>
+              <span *ngIf="editForm.get('first_name')?.errors?.['minlength']">Minimum 2 znaki.</span>
+            </div>
           </div>
 
           <div class="form-group">
-            <label>Płeć</label>
-            <select formControlName="gender">
-              <option value="">Wybierz...</option>
-              <option value="M">Mężczyzna</option>
-              <option value="F">Kobieta</option>
-            </select>
+            <label>Data urodzenia</label>
+            <input type="date" formControlName="birth_date">
+            <div class="field-error" *ngIf="editForm.get('birth_date')?.invalid && editForm.get('birth_date')?.touched">
+              <span *ngIf="editForm.get('birth_date')?.errors?.['tooYoung']">Musisz mieć co najmniej 18 lat.</span>
+              <span *ngIf="editForm.get('birth_date')?.errors?.['invalidDate']">Podana data jest nieprawidłowa.</span>
+            </div>
           </div>
 
+          <div class="form-row">
+            <div class="form-group">
+              <label>Płeć</label>
+              <select formControlName="gender">
+                <option value="">Wybierz...</option>
+                <option value="M">Mężczyzna</option>
+                <option value="F">Kobieta</option>
+                <option value="O">Inna</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Szukam</label>
+              <select formControlName="gender_preference">
+                <option value="">Wybierz...</option>
+                <option value="M">Mężczyzn</option>
+                <option value="F">Kobiet</option>
+                <option value="A">Wszystkich</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Sekcja: Preferencje wiekowe -->
+          <div class="section-label">Preferowany wiek partnera</div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Wiek od</label>
+              <input type="number" formControlName="min_preferred_age" placeholder="np. 22" min="18" max="99">
+              <div class="field-error" *ngIf="editForm.get('min_preferred_age')?.invalid && editForm.get('min_preferred_age')?.touched">
+                Zakres: 18–99.
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Wiek do</label>
+              <input type="number" formControlName="max_preferred_age" placeholder="np. 35" min="18" max="99">
+              <div class="field-error" *ngIf="editForm.get('max_preferred_age')?.invalid && editForm.get('max_preferred_age')?.touched">
+                Zakres: 18–99.
+              </div>
+            </div>
+          </div>
+
+          <div class="field-error" *ngIf="minMaxAgeError">
+            Minimalny wiek nie może być większy niż maksymalny.
+          </div>
+
+          <!-- Sekcja: O mnie -->
+          <div class="section-label">O mnie</div>
+
           <div class="form-group">
-            <label>O mnie</label>
+            <label>Bio</label>
             <textarea formControlName="bio" rows="4" placeholder="Napisz coś o sobie..."></textarea>
+            <div class="char-counter" [class.warn]="bioLength > 450">
+              {{ bioLength }} / 500
+            </div>
+            <div class="field-error" *ngIf="editForm.get('bio')?.errors?.['maxlength']">
+              Maksymalnie 500 znaków.
+            </div>
           </div>
 
           <div class="actions-area">
@@ -123,6 +202,7 @@
               Anuluj
             </button>
           </div>
+
         </div>
       </form>
     </ng-template>
