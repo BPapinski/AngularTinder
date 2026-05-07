@@ -1,4 +1,3 @@
-
 services:
   backend:
     build: ./backend
@@ -12,10 +11,10 @@ services:
       - DJANGO_SECRET_KEY=zmien_mnie_na_super_tajny_klucz_dla_dev
       - DJANGO_SETTINGS_MODULE=config.settings
       - REDIS_HOST=redis
-    command: sh -c "python manage.py create_sample_users && python manage.py runserver 0.0.0.0:8000"
+    command: sh -c "python manage.py migrate && python manage.py create_sample_users && daphne -b 0.0.0.0 -p 8000 config.asgi:application"
     depends_on:
       - redis
-
+ 
   frontend:
     build: ./frontend
     volumes:
@@ -27,7 +26,7 @@ services:
       - backend
     environment:
       - CHOKIDAR_USEPOLLING=true
-
+ 
   redis:
     image: redis:7
     ports:
