@@ -1,4 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, tap, throwError, BehaviorSubject } from 'rxjs';
 import { catchError, switchMap, filter, take, finalize } from 'rxjs/operators';
@@ -32,6 +33,7 @@ export interface UserProfile {
 })
 export class AuthService {
   private http = inject(HttpClient);
+  private router = inject(Router);
   private baseUrl = environment.apiUrl;
   private isRefreshing = false;
   private refreshTokenSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null);
@@ -73,6 +75,7 @@ export class AuthService {
     localStorage.removeItem('refresh_token');
 
     this.currentUser.set(null);
+    this.router.navigate(['/']);
   }
 
   fetchCurrentUser(): Observable<UserProfile> {

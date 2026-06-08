@@ -1,7 +1,8 @@
 .chat-layout {
   display: flex;
-  height: calc(100vh - 55px);
-  background: #f5f6f8;
+  height: calc(100vh - var(--header-height));
+  background: var(--bg-page);
+  font-family: 'Poppins', sans-serif;
 }
 
 .matches {
@@ -29,7 +30,13 @@
 }
 
 .match-row.active {
-  outline: 2px solid #ff4d6d;
+  outline: 2px solid var(--primary);
+  background: #fff8f9;
+}
+
+.match-row:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
 }
 
 .match-row:active {
@@ -82,6 +89,26 @@
   margin-bottom: 12px;
 }
 
+.back-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: #555;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+}
+
+.back-btn:hover {
+  background: #f0f0f0;
+}
+
+.avatar.small img {
+  width: 44px;
+  height: 44px;
+}
+
 .chat-header h3 {
   font-size: 18px;
   font-weight: 700;
@@ -112,7 +139,7 @@
 
 .bubble.mine {
   align-self: flex-end;
-  background: #ff4d6d;
+  background: var(--primary);
   color: #fff;
 }
 
@@ -133,17 +160,64 @@
 }
 
 .input button {
-  background: #ff4d6d;
+  background: var(--primary);
   color: #fff;
   border: none;
   border-radius: 14px;
-  padding: 0 18px;
+  padding: 10px 20px;
   font-weight: 600;
+  font-size: 14px;
   cursor: pointer;
+  transition: background 0.2s;
+}
+
+.input button:hover {
+  background: var(--primary-dark);
 }
 
 .empty-state {
-  margin-top: 80px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   color: #777;
+  padding: 40px 20px;
+}
+
+.empty-state .empty-icon {
+  font-size: 56px;
+  margin-bottom: 16px;
+}
+
+.empty-state h3 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  color: #333;
+}
+
+.empty-state p {
+  margin: 0;
+  max-width: 280px;
+  line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+  .back-btn {
+    display: block;
+  }
+
+  .chat-layout.chat-open .matches {
+    display: none;
+  }
+
+  .chat-layout:not(.chat-open) .chat {
+    display: none;
+  }
+
+  .matches {
+    width: 100%;
+    flex: 1;
+  }
 }

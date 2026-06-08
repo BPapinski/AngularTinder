@@ -24,6 +24,14 @@ export class HomeComponent implements OnInit {
   readonly SWIPE_THRESHOLD = 120;
   readonly USE_MOCKS = false;
 
+  get likeOpacity(): number {
+    return Math.max(0, Math.min(this.translateX / this.SWIPE_THRESHOLD, 1));
+  }
+
+  get nopeOpacity(): number {
+    return Math.max(0, Math.min(-this.translateX / this.SWIPE_THRESHOLD, 1));
+  }
+
   constructor(
     public authService: AuthService,
     private datingService: DatingService,
@@ -157,7 +165,6 @@ export class HomeComponent implements OnInit {
 
   logout() {
     this.authService.logout();
-    this.router.navigate(['/login']);
   }
 
   private removeFirstProfile() {

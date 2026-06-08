@@ -150,7 +150,7 @@ export class UserProfileComponent implements OnInit {
 
   getProfileImageUrl(): string {
     if (!this.user || !this.user.profile_image) {
-      return 'assets/placeholder-user.png';
+      return 'assets/placeholder-user.svg';
     }
     if (this.user.profile_image.startsWith('http')) {
       return this.user.profile_image;

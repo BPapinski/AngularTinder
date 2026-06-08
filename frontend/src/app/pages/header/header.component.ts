@@ -17,7 +17,7 @@ export class HeaderComponent {
     const user = this.user;
 
     if (!user || !user.profile_image) {
-      return 'assets/placeholder-user.png';
+      return 'assets/placeholder-user.svg';
     }
 
     if (user.profile_image.startsWith('http')) {

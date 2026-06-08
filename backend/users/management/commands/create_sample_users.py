@@ -1,6 +1,7 @@
 from datetime import date
 
 from django.core.management.base import BaseCommand
+from interactions.services import perform_like
 
 from users.models import User
 
@@ -106,5 +107,15 @@ class Command(BaseCommand):
                 user.set_password(password)
                 user.save()
                 self.stdout.write(self.style.SUCCESS(f"Successfully updated user: {user.email}"))
+
+        john = User.objects.get(email="john@example.com")
+        anna = User.objects.get(email="anna@example.com")
+        mike = User.objects.get(email="mike@example.com")
+        sara = User.objects.get(email="sara@example.com")
+
+        perform_like(john, anna)
+        perform_like(anna, john)
+        perform_like(mike, sara)
+        perform_like(sara, mike)
 
         self.stdout.write(self.style.SUCCESS("Sample users creation completed!"))

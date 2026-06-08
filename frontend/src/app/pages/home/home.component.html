@@ -31,7 +31,7 @@
         >
 
           <div class="card-image-wrapper">
-             <img
+            <img
               *ngIf="profiles[0].profile_image; else placeholder"
               [src]="profiles[0].profile_image"
               alt="Profile"
@@ -41,6 +41,15 @@
                 {{ profiles[0].first_name.charAt(0) || '?' }}
               </div>
             </ng-template>
+
+            <div
+              class="swipe-stamp like"
+              [style.opacity]="likeOpacity"
+            >LIKE</div>
+            <div
+              class="swipe-stamp nope"
+              [style.opacity]="nopeOpacity"
+            >NOPE</div>
 
             <div class="card-overlay"></div>
           </div>
@@ -73,9 +82,10 @@
   </ng-container>
 
   <ng-template #loginButton>
-    <div class="state-container">
-      <h1>Witaj!</h1>
-      <p>Zaloguj się, aby zacząć poznawać ludzi.</p>
+    <div class="state-container welcome">
+      <div class="welcome-icon">💕</div>
+      <h1>Witaj w LoveApp</h1>
+      <p>Przesuwaj profile w prawo lub w lewo i znajdź kogoś wyjątkowego.</p>
       <button class="action-btn" (click)="login()">Zaloguj się</button>
     </div>
   </ng-template>

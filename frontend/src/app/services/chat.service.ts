@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from './auth.service';
 import { Observable, Subject } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {
@@ -9,6 +10,7 @@ export class ChatService {
   private auth = inject(AuthService);
 
   private socket: WebSocket | null = null;
+  private otherUserId: number | null = null;
 
   private messageSubject = new Subject<any>();
   public messages$ = this.messageSubject.asObservable();
@@ -23,40 +25,42 @@ export class ChatService {
 
   connect(otherUserId: number) {
     this.disconnect();
+    this.otherUserId = otherUserId;
 
     const token = localStorage.getItem('access_token');
-    const wsUrl = `ws://127.0.0.1:8000/ws/chat/${otherUserId}/?token=${token}`;
+    const wsUrl = `${environment.wsUrl}/ws/chat/${otherUserId}/?token=${token}`;
 
-    console.log('🔗 Łączę się z WebSocketem:', wsUrl);
     this.socket = new WebSocket(wsUrl);
 
-    this.socket.onopen = () => {
-      console.log('✅ WebSocket połączony z użytkownikiem:', otherUserId);
-    };
-
     this.socket.onmessage = (event) => {
-      console.log('📩 ChatService otrzymała surowe dane z WS:', event.data);
       const data = JSON.parse(event.data);
-      console.log('📩 ChatService parsowała wiadomość:', data);
-      this.messageSubject.next(data);
-    };
-
-    this.socket.onclose = (event) => {
-      console.log('❌ WebSocket zamknięty, kod:', event.code);
-    };
-
-    this.socket.onerror = (error) => {
-      console.error('⚠️ Błąd WebSocketa:', error);
+      this.messageSubject.next(this.normalizeMessage(data));
     };
   }
 
   sendMessage(content: string) {
-    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-      const msg = { content: content };
-      this.socket.send(JSON.stringify(msg));
-    } else {
-      console.error('Nie można wysłać wiadomości, brak połączenia WebSocket.');
+    const trimmed = content.trim();
+    if (!trimmed) return;
+
+    if (this.socket?.readyState === WebSocket.OPEN) {
+      this.socket.send(JSON.stringify({ content: trimmed }));
+      return;
     }
+
+    if (!this.otherUserId) return;
+
+    const token = localStorage.getItem('access_token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+
+    this.http
+      .post<any>(`${environment.apiUrl}/chat/send/`, {
+        receiver_id: this.otherUserId,
+        content: trimmed,
+      }, { headers })
+      .subscribe({
+        next: (msg) => this.messageSubject.next(this.normalizeMessage(msg)),
+        error: (err) => console.error('Failed to send message:', err),
+      });
   }
 
   disconnect() {
@@ -64,5 +68,13 @@ export class ChatService {
       this.socket.close();
       this.socket = null;
     }
+    this.otherUserId = null;
+  }
+
+  private normalizeMessage(msg: any) {
+    return {
+      ...msg,
+      receiver: typeof msg.receiver === 'object' ? msg.receiver?.id : msg.receiver,
+    };
   }
 }

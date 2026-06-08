@@ -9,13 +9,19 @@
       </div>
 
       <ng-container *ngIf="loading(); else listTpl">
-        <p class="loading">Ładuję matche...</p>
+        <div class="loading-state">
+          <div class="pulse-circle"></div>
+          <p>Ładuję pary...</p>
+        </div>
       </ng-container>
 
       <ng-template #listTpl>
 
-        <div *ngIf="matches.length === 0" class="empty">
-          Nie masz jeszcze matchy 💔
+        <div *ngIf="matches.length === 0" class="empty-state">
+          <div class="empty-icon">💔</div>
+          <h3>Brak par</h3>
+          <p>Przesuwaj profile na stronie głównej — gdy ktoś Cię polubi, pojawi się tutaj.</p>
+          <a routerLink="/" class="action-btn">Odkrywaj profile</a>
         </div>
 
         <div class="matches-list" *ngIf="matches.length > 0">
@@ -57,6 +63,11 @@
   </ng-container>
 
   <ng-template #loginTpl>
-    <button routerLink="/login">Zaloguj się</button>
+    <div class="state-container">
+      <div class="empty-icon">💘</div>
+      <h2>Zaloguj się</h2>
+      <p>Zobacz swoje pary po zalogowaniu.</p>
+      <a routerLink="/login" class="action-btn">Zaloguj się</a>
+    </div>
   </ng-template>
 </div>

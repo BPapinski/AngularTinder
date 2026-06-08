@@ -7,7 +7,7 @@
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(0,0,0,0.08);
   box-shadow: 0 4px 20px rgba(0,0,0,0.03);
-  height: 65px;
+  height: var(--header-height);
   display: flex;
   align-items: center;
 }
@@ -176,6 +176,23 @@
 
 .dropdown-item.logout:hover {
   background: #fff0f2;
+}
+
+.menu-header {
+  padding: 10px 16px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 4px;
+}
+
+.menu-header small {
+  color: #999;
+  font-size: 11px;
+}
+
+.menu-header strong {
+  font-size: 13px;
+  color: #333;
+  word-break: break-all;
 }
 
 .login-btn {
