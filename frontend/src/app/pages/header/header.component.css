@@ -182,6 +182,9 @@
   padding: 10px 16px;
   border-bottom: 1px solid #eee;
   margin-bottom: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .menu-header small {
@@ -192,7 +195,8 @@
 .menu-header strong {
   font-size: 13px;
   color: #333;
-  word-break: break-all;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .login-btn {
