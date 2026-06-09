@@ -6,6 +6,7 @@ import { Subscription, Observable } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { ActivatedRoute } from '@angular/router';
 import { environment } from '../../../environments/environment';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   standalone: true,
@@ -28,6 +29,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     private authService: AuthService,
     private route: ActivatedRoute,
+    private notificationService: NotificationService,
   ) {}
 
   ngOnInit() {
@@ -88,6 +90,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 
       this.cdr.detectChanges();
       this.scrollToBottom();
+      this.notificationService.refresh();
     });
 
     this.chatService.connect(user.id);

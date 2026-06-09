@@ -215,3 +215,18 @@
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(255, 88, 100, 0.4);
 }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #e74c3c;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  padding: 0 4px;
+  line-height: 1;
+}

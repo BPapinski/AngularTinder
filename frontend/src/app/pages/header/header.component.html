@@ -22,6 +22,7 @@
   >
     <span class="nav-icon">💘</span>
     <span class="nav-text">Pary</span>
+    <span class="badge" *ngIf="notificationService.newMatches() > 0">{{ notificationService.newMatches() }}</span>
   </a>
 
   <a
@@ -31,6 +32,7 @@
   >
     <span class="nav-icon">💬</span>
     <span class="nav-text">Chaty</span>
+    <span class="badge" *ngIf="notificationService.unreadMessages() > 0">{{ notificationService.unreadMessages() }}</span>
   </a>
 </nav>
 
