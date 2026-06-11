@@ -56,6 +56,30 @@ class UnreadCountView(APIView):
         return Response({"unread": count})
 
 
+class UnreadPerUserView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        from django.db.models import Count
+
+        rows = (
+            ChatMessage.objects.filter(receiver=request.user, is_read=False)
+            .values("sender_id")
+            .annotate(count=Count("id"))
+        )
+        return Response({row["sender_id"]: row["count"] for row in rows})
+
+
+class MarkReadView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, user_id):
+        updated = ChatMessage.objects.filter(sender_id=user_id, receiver=request.user, is_read=False).update(
+            is_read=True
+        )
+        return Response({"marked_read": updated})
+
+
 class SendMessageView(APIView):
     permission_classes = [IsAuthenticated]
 

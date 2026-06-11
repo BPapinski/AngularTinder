@@ -124,3 +124,42 @@
   background: #ff5864;
   color: white;
 }
+
+.quick-login {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px dashed #eee;
+}
+
+.quick-login-label {
+  text-align: center;
+  font-size: 11px;
+  color: #bbb;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+
+.quick-login-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.quick-btn {
+  flex: 1;
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+  background: #fafafa;
+  color: #444;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.quick-btn:hover {
+  background: #fff0f1;
+  border-color: #ff5864;
+  color: #ff5864;
+}

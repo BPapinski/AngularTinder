@@ -3,6 +3,7 @@ import { Router, RouterModule  } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
 import { DatingService, DatingProfile } from '../../services/dating.service';
+import { NotificationService } from '../../services/notification.service';
 import { finalize } from 'rxjs';
 
 @Component({
@@ -36,7 +37,8 @@ export class HomeComponent implements OnInit {
     public authService: AuthService,
     private datingService: DatingService,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notificationService: NotificationService,
   ) {}
 
   ngOnInit() {
@@ -121,11 +123,15 @@ export class HomeComponent implements OnInit {
   smash(profile: DatingProfile) {
     if (!profile) return;
 
-    console.log('SMASH (UI):', profile.first_name);
     this.removeFirstProfile();
 
     this.datingService.sendInteraction(profile.id, 'like').subscribe({
-      next: (res) => console.log('SMASH (API Success):', res),
+      next: (res) => {
+        if (res?.is_match) {
+          this.notificationService.showMatchPopup(profile.id, profile.first_name);
+          this.notificationService.newMatches.update(n => n + 1);
+        }
+      },
       error: (err) => console.error('SMASH (API Error):', err)
     });
   }

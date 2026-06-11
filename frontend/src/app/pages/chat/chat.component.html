@@ -18,7 +18,13 @@
       <div class="sub">Kliknij aby otworzyć czat</div>
     </div>
 
-    <div class="chevron">›</div>
+    <div class="chevron">
+      <span
+        *ngIf="(notificationService.unreadPerUser()[m.id] ?? 0) > 0"
+        class="unread-badge"
+      >{{ notificationService.unreadPerUser()[m.id] }}</span>
+      <span *ngIf="(notificationService.unreadPerUser()[m.id] ?? 0) === 0">›</span>
+    </div>
   </div>
 </aside>
 

@@ -29,7 +29,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     private authService: AuthService,
     private route: ActivatedRoute,
-    private notificationService: NotificationService,
+    protected notificationService: NotificationService,
   ) {}
 
   ngOnInit() {
@@ -52,6 +52,11 @@ export class ChatComponent implements OnInit, OnDestroy {
       this.messages.push(msg);
       this.cdr.detectChanges();
       this.scrollToBottom();
+
+      if (!msg.is_me) {
+        this.notificationService.markRead(senderId);
+        this.chatService.markRead(senderId);
+      }
     });
 
     const userIdFromUrl = this.route.snapshot.queryParams['userId'];
@@ -71,6 +76,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   goBack() {
     this.chatService.disconnect();
+    this.notificationService.activeChatUserId.set(null);
     this.selectedUser = null;
     this.messages = [];
   }
@@ -79,6 +85,8 @@ export class ChatComponent implements OnInit, OnDestroy {
     if (this.selectedUser?.id === user.id) return;
     this.selectedUser = user;
     this.messages = [];
+    this.notificationService.activeChatUserId.set(user.id);
+    this.notificationService.markRead(user.id);
 
     this.chatService.getMessagesHistory(user.id).subscribe(res => {
       const me = this.authService.currentUser();
@@ -113,6 +121,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.chatService.disconnect();
+    this.notificationService.activeChatUserId.set(null);
     this.messagesSubscription?.unsubscribe();
   }
 }

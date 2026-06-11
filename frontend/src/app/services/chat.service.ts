@@ -63,6 +63,14 @@ export class ChatService {
       });
   }
 
+  markRead(userId: number): void {
+    const token = localStorage.getItem('access_token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    this.http
+      .post<any>(`${environment.apiUrl}/chat/mark-read/${userId}/`, {}, { headers })
+      .subscribe({ error: () => {} });
+  }
+
   disconnect() {
     if (this.socket) {
       this.socket.close();

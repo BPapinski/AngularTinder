@@ -12,6 +12,17 @@ export class NotificationService {
 
   unreadMessages = signal(0);
   newMatches = signal(0);
+  unreadPerUser = signal<Partial<Record<number, number>>>({});
+  activeChatUserId = signal<number | null>(null);
+  matchPopup = signal<{ userId: number; userName: string } | null>(null);
+
+  showMatchPopup(userId: number, userName: string) {
+    this.matchPopup.set({ userId, userName });
+  }
+
+  closeMatchPopup() {
+    this.matchPopup.set(null);
+  }
 
   startPolling() {
     this.refresh();
@@ -36,6 +47,11 @@ export class NotificationService {
       error: () => {},
     });
 
+    this.auth.authFetch<Record<number, number>>('/chat/unread-per-user/').subscribe({
+      next: (perUser) => this.unreadPerUser.set(perUser),
+      error: () => {},
+    });
+
     this.auth.authFetch<any[]>('/interactions/matches/').subscribe({
       next: (matches) => {
         const raw = localStorage.getItem(this.MATCHES_VISIT_KEY);
@@ -54,6 +70,16 @@ export class NotificationService {
     this.newMatches.set(0);
   }
 
+  markRead(userId: number) {
+    const perUser = { ...this.unreadPerUser() };
+    const wasUnread = perUser[userId] ?? 0;
+    if (wasUnread === 0) return;
+
+    delete perUser[userId];
+    this.unreadPerUser.set(perUser);
+    this.unreadMessages.update(n => Math.max(0, n - wasUnread));
+  }
+
   private connectWebSocket() {
     if (this.socket) return;
 
@@ -66,7 +92,17 @@ export class NotificationService {
     this.socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
       if (data.type === 'new_message') {
+        const fromId: number = data.from_user_id;
+        if (fromId === this.activeChatUserId()) return;
+
         this.unreadMessages.update(count => count + 1);
+        this.unreadPerUser.update(perUser => ({
+          ...perUser,
+          [fromId]: (perUser[fromId] ?? 0) + 1,
+        }));
+      } else if (data.type === 'new_match') {
+        this.newMatches.update(count => count + 1);
+        this.showMatchPopup(data.with_user_id, data.with_user_name);
       }
     };
 

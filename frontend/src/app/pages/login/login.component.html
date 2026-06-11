@@ -42,9 +42,21 @@
     <div class="divider">lub</div>
 
     <button class="secondary-btn" (click)="goToRegister()">
-        Utwórz konto
+      Utwórz konto
     </button>
 
+    <div class="quick-login">
+      <p class="quick-login-label">Szybkie logowanie (dev)</p>
+      <div class="quick-login-buttons">
+        <button
+          *ngFor="let acc of quickAccounts"
+          class="quick-btn"
+          (click)="loginAs(acc.email, acc.password)"
+        >
+          {{ acc.label }}
+        </button>
+      </div>
+    </div>
 
   </div>
 

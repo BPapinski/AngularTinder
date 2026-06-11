@@ -31,6 +31,17 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             )
         )
 
+    async def new_match_notification(self, event):
+        await self.send(
+            text_data=json.dumps(
+                {
+                    "type": "new_match",
+                    "with_user_id": event["with_user_id"],
+                    "with_user_name": event["with_user_name"],
+                }
+            )
+        )
+
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
