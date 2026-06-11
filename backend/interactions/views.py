@@ -70,3 +70,23 @@ class UserMatchesView(APIView):
 
         serializer = self.serializer_class(queryset, many=True, context={"request": request})
         return Response(serializer.data)
+
+
+class ResetMatchesView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request):
+        from interactions.models import Interaction
+
+        deleted_matches = Match.objects.filter(Q(user1=request.user) | Q(user2=request.user)).delete()[0]
+
+        deleted_interactions = Interaction.objects.filter(Q(user=request.user) | Q(target_user=request.user)).delete()[
+            0
+        ]
+
+        return Response(
+            {
+                "deleted_matches": deleted_matches,
+                "deleted_interactions": deleted_interactions,
+            }
+        )

@@ -13,6 +13,7 @@ export class NotificationService {
   unreadMessages = signal(0);
   newMatches = signal(0);
   unreadPerUser = signal<Partial<Record<number, number>>>({});
+  senderNames = signal<Record<number, string>>({});
   activeChatUserId = signal<number | null>(null);
   matchPopup = signal<{ userId: number; userName: string } | null>(null);
 
@@ -47,8 +48,17 @@ export class NotificationService {
       error: () => {},
     });
 
-    this.auth.authFetch<Record<number, number>>('/chat/unread-per-user/').subscribe({
-      next: (perUser) => this.unreadPerUser.set(perUser),
+    this.auth.authFetch<{ user_id: number; user_name: string; count: number }[]>('/chat/unread-per-user/').subscribe({
+      next: (rows) => {
+        const perUser: Partial<Record<number, number>> = {};
+        const names: Record<number, string> = { ...this.senderNames() };
+        for (const row of rows) {
+          perUser[row.user_id] = row.count;
+          names[row.user_id] = row.user_name;
+        }
+        this.unreadPerUser.set(perUser);
+        this.senderNames.set(names);
+      },
       error: () => {},
     });
 
@@ -95,6 +105,7 @@ export class NotificationService {
         const fromId: number = data.from_user_id;
         if (fromId === this.activeChatUserId()) return;
 
+        this.senderNames.update(names => ({ ...names, [fromId]: data.from_user_name }));
         this.unreadMessages.update(count => count + 1);
         this.unreadPerUser.update(perUser => ({
           ...perUser,

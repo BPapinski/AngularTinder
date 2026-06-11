@@ -64,10 +64,15 @@ class UnreadPerUserView(APIView):
 
         rows = (
             ChatMessage.objects.filter(receiver=request.user, is_read=False)
-            .values("sender_id")
+            .values("sender_id", "sender__first_name")
             .annotate(count=Count("id"))
         )
-        return Response({row["sender_id"]: row["count"] for row in rows})
+        return Response(
+            [
+                {"user_id": row["sender_id"], "user_name": row["sender__first_name"], "count": row["count"]}
+                for row in rows
+            ]
+        )
 
 
 class MarkReadView(APIView):

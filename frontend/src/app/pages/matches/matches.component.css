@@ -180,3 +180,34 @@
 .action-btn:hover {
   transform: translateY(-2px);
 }
+
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.reset-btn {
+  padding: 6px 14px;
+  border-radius: 10px;
+  border: 1px dashed #ddd;
+  background: transparent;
+  color: #aaa;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.reset-btn:hover:not(:disabled) {
+  border-color: #ff5864;
+  color: #ff5864;
+  background: #fff0f2;
+}
+
+.reset-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

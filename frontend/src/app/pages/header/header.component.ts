@@ -15,6 +15,18 @@ export class HeaderComponent implements OnInit {
   authService = inject(AuthService);
   notificationService = inject(NotificationService);
 
+  get unreadSenders() {
+    return () => {
+      const perUser = this.notificationService.unreadPerUser();
+      const names = this.notificationService.senderNames();
+      return Object.entries(perUser)
+        .filter(([, count]) => (count ?? 0) > 0)
+        .map(([id, count]) => ({ id: Number(id), name: names[Number(id)] ?? '...', count: count! }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 4);
+    };
+  }
+
   ngOnInit() {
     if (this.authService.isLoggedIn()) {
       this.notificationService.startPolling();

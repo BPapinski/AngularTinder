@@ -4,7 +4,17 @@
     <div class="content">
 
       <div class="header">
-        <h2 class="title">✨ Twoje pary</h2>
+        <div class="header-top">
+          <h2 class="title">✨ Twoje pary</h2>
+          <button
+            class="reset-btn"
+            (click)="resetMatches()"
+            [disabled]="resetting()"
+            title="Usuń wszystkie pary i polubienia (dev)"
+          >
+            {{ resetting() ? '...' : '🗑 Usuń pary' }}
+          </button>
+        </div>
         <p class="subtitle">Osoby, z którymi możesz zacząć rozmowę</p>
       </div>
 
