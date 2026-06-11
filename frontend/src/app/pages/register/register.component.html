@@ -1,6 +1,7 @@
 <div class="register-page">
 
   <div class="register-card">
+    <div class="brand">Love<span>App</span></div>
     <h2>Utwórz konto</h2>
 
     <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
@@ -62,7 +63,8 @@
         </div>
       </div>
 
-      <div class="error" *ngIf="errorMessage()">
+      <div class="error" *ngIf="errorMessage()" role="alert">
+        <strong>Nie można utworzyć konta:</strong>
         {{ errorMessage() }}
       </div>
 

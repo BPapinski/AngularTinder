@@ -40,6 +40,7 @@ class Match(models.Model):
 
     class Meta:
         unique_together = ("user1", "user2")
+        verbose_name_plural = "matches"
 
     def __str__(self):
         return f"Match: {self.user1} & {self.user2}"

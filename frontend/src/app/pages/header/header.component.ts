@@ -1,7 +1,8 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-header',
@@ -10,14 +11,21 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './header.component.html',
   styleUrl: './header.component.css'
 })
-export class HeaderComponent {
+export class HeaderComponent implements OnInit {
   authService = inject(AuthService);
+  notificationService = inject(NotificationService);
+
+  ngOnInit() {
+    if (this.authService.isLoggedIn()) {
+      this.notificationService.startPolling();
+    }
+  }
 
   getProfileImageUrl(): string {
     const user = this.user;
 
     if (!user || !user.profile_image) {
-      return 'assets/placeholder-user.png';
+      return 'assets/placeholder-user.svg';
     }
 
     if (user.profile_image.startsWith('http')) {

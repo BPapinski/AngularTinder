@@ -5,7 +5,7 @@
       Love<span class="highlight">App</span>
     </a>
 
-    <nav class="main-nav">
+    <nav class="main-nav" *ngIf="authService.isLoggedIn()">
   <a
     routerLink="/"
     routerLinkActive="active"
@@ -22,6 +22,7 @@
   >
     <span class="nav-icon">💘</span>
     <span class="nav-text">Pary</span>
+    <span class="badge" *ngIf="notificationService.newMatches() > 0">{{ notificationService.newMatches() }}</span>
   </a>
 
   <a
@@ -31,6 +32,7 @@
   >
     <span class="nav-icon">💬</span>
     <span class="nav-text">Chaty</span>
+    <span class="badge" *ngIf="notificationService.unreadMessages() > 0">{{ notificationService.unreadMessages() }}</span>
   </a>
 </nav>
 
@@ -46,7 +48,7 @@
             [src]="getProfileImageUrl()"
             class="user-avatar"
             alt="Avatar"
-            (error)="img.src='assets/placeholder-user.png'"
+            (error)="img.src='assets/placeholder-user.svg'"
             #img
           >
 
@@ -58,20 +60,13 @@
         </div>
 
         <div class="dropdown-menu">
-          <div
-            class="menu-header"
-            style="padding: 10px 16px; border-bottom: 1px solid #eee;"
-          >
-            <small style="color: #999;">Zalogowany jako:</small><br>
+          <div class="menu-header">
+            <small>Zalogowany jako</small>
             <strong>{{ user?.email }}</strong>
           </div>
 
           <a routerLink="/profile" class="dropdown-item">
             👤 Twój Profil
-          </a>
-
-          <a routerLink="/settings" class="dropdown-item">
-            ⚙️ Ustawienia
           </a>
 
           <div class="divider"></div>

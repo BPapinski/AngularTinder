@@ -1,11 +1,12 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewChecked, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChatService } from '../../services/chat.service';
 import { FormsModule } from '@angular/forms';
 import { Subscription, Observable } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { ActivatedRoute } from '@angular/router';
-import { map } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   standalone: true,
@@ -13,13 +14,11 @@ import { map } from 'rxjs/operators';
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.css']
 })
-export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
+export class ChatComponent implements OnInit, OnDestroy {
   matches$: Observable<any[]> | null = null;
   messages: any[] = [];
   selectedUser: any = null;
   newMessage = '';
-
-  private readonly BACKEND_URL = 'http://localhost:8000';
 
   private messagesSubscription: Subscription | null = null;
 
@@ -30,69 +29,56 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     private cdr: ChangeDetectorRef,
     private authService: AuthService,
     private route: ActivatedRoute,
+    private notificationService: NotificationService,
   ) {}
-
-  get currentUser() {
-    return this.authService.currentUser();
-  }
 
   ngOnInit() {
     this.matches$ = this.chatService.getMatches();
 
     this.messagesSubscription = this.chatService.messages$.subscribe(msg => {
-      if (!this.selectedUser) {
-        console.log('⏭️ Brak wybranego użytkownika, pomijam wiadomość');
-        return;
-      }
+      if (!this.selectedUser) return;
 
       const senderId = msg.sender?.id;
       const receiverId = Number(msg.receiver);
       const selectedUserId = this.selectedUser.id;
-
       const isRelevant = senderId === selectedUserId || receiverId === selectedUserId;
 
-      if (!isRelevant) {
-        console.log('⏭️ Wiadomość nie dotyczy wybranego użytkownika, pomijam');
-        return;
-      }
-
-      const userIdFromUrl = this.route.snapshot.queryParams['userId'];
-
-      if (userIdFromUrl && this.matches$) {
-        const userToSelect$ = this.matches$.pipe(
-          map((matches$: any[]) => matches$.find(m => m.id == userIdFromUrl))
-        );
-
-        if (userToSelect$) {
-          this.selectUser(userToSelect$);
-        }
-      }
+      if (!isRelevant) return;
+      if (msg.id && this.messages.some(m => m.id === msg.id)) return;
 
       const me = this.authService.currentUser();
-      msg.is_me = me ? msg.sender?.id === me.id : false;
+      msg.is_me = me ? senderId === me.id : false;
 
-      console.log('✅ Dodaję wiadomość do tablicy:', msg);
       this.messages.push(msg);
       this.cdr.detectChanges();
       this.scrollToBottom();
     });
-  }
 
-  ngAfterViewChecked() {
+    const userIdFromUrl = this.route.snapshot.queryParams['userId'];
+    if (userIdFromUrl) {
+      this.chatService.getMatches().subscribe(matches => {
+        const user = matches.find(m => m.id == userIdFromUrl);
+        if (user) this.selectUser(user);
+      });
+    }
   }
 
   getProfileImage(path: string | null): string {
-    if(!path) return '/assets/placeholder-user.png';
+    if (!path) return '/assets/placeholder-user.svg';
     if (path.startsWith('http')) return path;
-    return `${this.BACKEND_URL}${path}`;
+    return `${environment.apiUrl.replace('/api', '')}${path}`;
+  }
+
+  goBack() {
+    this.chatService.disconnect();
+    this.selectedUser = null;
+    this.messages = [];
   }
 
   selectUser(user: any) {
     if (this.selectedUser?.id === user.id) return;
     this.selectedUser = user;
     this.messages = [];
-
-
 
     this.chatService.getMessagesHistory(user.id).subscribe(res => {
       const me = this.authService.currentUser();
@@ -104,6 +90,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
 
       this.cdr.detectChanges();
       this.scrollToBottom();
+      this.notificationService.refresh();
     });
 
     this.chatService.connect(user.id);
@@ -116,19 +103,16 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   scrollToBottom(): void {
-    try {
-      setTimeout(() => {
-        if (this.messagesContainer) {
-          this.messagesContainer.nativeElement.scrollTop = this.messagesContainer.nativeElement.scrollHeight;
-        }
-      }, 50);
-    } catch(err) { }
+    setTimeout(() => {
+      if (this.messagesContainer) {
+        this.messagesContainer.nativeElement.scrollTop =
+          this.messagesContainer.nativeElement.scrollHeight;
+      }
+    }, 50);
   }
 
   ngOnDestroy() {
     this.chatService.disconnect();
-    if (this.messagesSubscription) {
-      this.messagesSubscription.unsubscribe();
-    }
+    this.messagesSubscription?.unsubscribe();
   }
 }

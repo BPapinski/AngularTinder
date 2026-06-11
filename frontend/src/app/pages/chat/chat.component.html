@@ -1,4 +1,4 @@
-<div class="chat-layout">
+<div class="chat-layout" [class.chat-open]="selectedUser">
 
   <aside class="matches">
   <h3 class="matches-title">Twoje pary</h3>
@@ -25,11 +25,12 @@
   <section class="chat">
     <ng-container *ngIf="selectedUser; else empty">
       <div class="chat-header">
-  <div class="avatar small">
-    <img [src]="getProfileImage(selectedUser.profile_image)" />
-  </div>
-  <h3>{{ selectedUser.first_name }}</h3>
-</div>
+        <button class="back-btn" (click)="goBack()">←</button>
+        <div class="avatar small">
+          <img [src]="getProfileImage(selectedUser.profile_image)" alt="" />
+        </div>
+        <h3>{{ selectedUser.first_name }}</h3>
+      </div>
 
       <div class="messages" #messagesContainer>
   <div
@@ -53,7 +54,9 @@
 
     <ng-template #empty>
       <div class="empty-state">
-        <p>Wybierz match, aby zacząć rozmowę</p>
+        <div class="empty-icon">💬</div>
+        <h3>Wybierz rozmowę</h3>
+        <p>Kliknij parę z listy po lewej, aby rozpocząć czat.</p>
       </div>
     </ng-template>
   </section>

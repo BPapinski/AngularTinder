@@ -1,6 +1,6 @@
 
 .profile-page-container {
-  min-height: calc(100vh - 65px);
+  min-height: calc(100vh - var(--header-height));
   background: #f0f2f5;
   padding: 20px;
   display: flex;

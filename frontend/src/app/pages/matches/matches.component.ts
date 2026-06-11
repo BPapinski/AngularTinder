@@ -4,6 +4,7 @@ import { RouterModule, Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { DatingService } from '../../services/dating.service';
+import { NotificationService } from '../../services/notification.service';
 
 export interface MatchItem {
   id: number;
@@ -31,11 +32,13 @@ export class MatchesComponent implements OnInit {
   constructor(
     public authService: AuthService,
     private datingService: DatingService,
-    private router: Router
+    private router: Router,
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit() {
     if (this.authService.isLoggedIn()) {
+      this.notificationService.clearMatches();
       this.loadMatches();
     }
   }

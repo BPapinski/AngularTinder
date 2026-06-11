@@ -1,11 +1,11 @@
 .register-page {
   min-height: 100vh;
-  background: linear-gradient(180deg, #ff5864, #ff8f5e);
+  background: var(--bg-gradient);
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 16px;
-  font-family: "Segoe UI", Roboto, sans-serif;
+  padding: 24px 16px;
+  font-family: 'Poppins', sans-serif;
 }
 
 .register-card {
@@ -13,13 +13,28 @@
   max-width: 420px;
   background: white;
   border-radius: 24px;
-  padding: 24px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  padding: 28px 24px;
+  box-shadow: var(--shadow-card);
+}
+
+.brand {
+  text-align: center;
+  font-size: 26px;
+  font-weight: 800;
+  color: #333;
+  margin-bottom: 6px;
+  letter-spacing: -0.5px;
+}
+
+.brand span {
+  color: var(--primary);
 }
 
 .register-card h2 {
   text-align: center;
   margin-bottom: 16px;
+  font-weight: 700;
+  color: #222;
 }
 
 .form-group {

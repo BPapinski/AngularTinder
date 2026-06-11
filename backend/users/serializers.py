@@ -6,7 +6,8 @@ from .models import User
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True, min_length=6)
+    age = serializers.ReadOnlyField()
 
     class Meta:
         model = User
@@ -16,9 +17,12 @@ class RegisterSerializer(serializers.ModelSerializer):
             "password",
             "first_name",
             "gender",
+            "gender_preference",
             "birth_date",
             "bio",
             "profile_image",
+            "min_preferred_age",
+            "max_preferred_age",
             "age",
         )
         extra_kwargs = {

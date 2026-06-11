@@ -1,11 +1,11 @@
 
 .login-page {
   min-height: 100vh;
-  background: linear-gradient(180deg, #ff5864, #ff8f5e);
+  background: var(--bg-gradient);
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: "Segoe UI", Roboto, sans-serif;
+  font-family: 'Poppins', sans-serif;
   padding: 16px;
 }
 
@@ -15,8 +15,21 @@
   max-width: 360px;
   background: white;
   border-radius: 24px;
-  padding: 24px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  padding: 32px 24px;
+  box-shadow: var(--shadow-card);
+}
+
+.brand {
+  text-align: center;
+  font-size: 28px;
+  font-weight: 800;
+  color: #333;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+
+.brand span {
+  color: var(--primary);
 }
 
 
@@ -24,6 +37,8 @@
   text-align: center;
   margin-bottom: 20px;
   font-size: 26px;
+  font-weight: 700;
+  color: #222;
 }
 
 

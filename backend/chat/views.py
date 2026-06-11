@@ -40,10 +40,20 @@ class ChatMessagesView(APIView):
         ):
             raise PermissionDenied("No match")
 
+        ChatMessage.objects.filter(sender=other, receiver=user, is_read=False).update(is_read=True)
+
         messages = ChatMessage.objects.filter(sender__in=[user, other], receiver__in=[user, other])
 
         serializer = ChatMessageSerializer(messages, many=True)
         return Response(serializer.data)
+
+
+class UnreadCountView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        count = ChatMessage.objects.filter(receiver=request.user, is_read=False).count()
+        return Response({"unread": count})
 
 
 class SendMessageView(APIView):
