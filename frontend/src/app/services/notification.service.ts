@@ -50,7 +50,7 @@ export class NotificationService {
 
     this.auth.authFetch<{ user_id: number; user_name: string; count: number }[]>('/chat/unread-per-user/').subscribe({
       next: (rows) => {
-        const perUser: Partial<Record<number, number>> = {};
+        const perUser: Partial<Record<number, number>> = { ...this.unreadPerUser() };
         const names: Record<number, string> = { ...this.senderNames() };
         for (const row of rows) {
           perUser[row.user_id] = row.count;
