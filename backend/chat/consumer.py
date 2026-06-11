@@ -5,6 +5,33 @@ from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 
 
+class NotificationConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        self.user = self.scope.get("user")
+        if not self.user or self.user.is_anonymous:
+            await self.close(code=4001)
+            return
+
+        self.group_name = f"notifications_{self.user.id}"
+        await self.channel_layer.group_add(self.group_name, self.channel_name)
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        if hasattr(self, "group_name"):
+            await self.channel_layer.group_discard(self.group_name, self.channel_name)
+
+    async def new_message_notification(self, event):
+        await self.send(
+            text_data=json.dumps(
+                {
+                    "type": "new_message",
+                    "from_user_id": event["from_user_id"],
+                    "from_user_name": event["from_user_name"],
+                }
+            )
+        )
+
+
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         try:
@@ -59,6 +86,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 },
             )
             print(f"DEBUG: Wiadomość rozesłana do grupy: {self.room_group_name}")
+
+            await self.channel_layer.group_send(
+                f"notifications_{self.other_id}",
+                {
+                    "type": "new_message_notification",
+                    "from_user_id": self.user.id,
+                    "from_user_name": self.user.first_name,
+                },
+            )
         except Exception as e:
             print(f"ERROR IN RECEIVE: {e}")
             traceback.print_exc()

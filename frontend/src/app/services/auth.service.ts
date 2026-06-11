@@ -2,7 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, tap, throwError, BehaviorSubject } from 'rxjs';
-import { catchError, switchMap, filter, take, finalize } from 'rxjs/operators';
+import { catchError, switchMap, take, finalize } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 export interface LoginRequest {
@@ -131,16 +131,20 @@ export class AuthService {
         }),
         catchError((err) => {
           this.isRefreshing = false;
+          this.refreshTokenSubject.next(null);
           this.logout();
           return throwError(() => err);
         })
       );
     } else {
       return this.refreshTokenSubject.pipe(
-        filter(token => token != null),
         take(1),
-        switchMap(() => {
-            return this.authFetch<T>(originalEndpoint);
+        switchMap(token => {
+          if (!token) {
+            this.logout();
+            return throwError(() => new Error('Session expired'));
+          }
+          return this.authFetch<T>(originalEndpoint);
         })
       );
     }

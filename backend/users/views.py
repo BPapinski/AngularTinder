@@ -5,9 +5,19 @@ from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.exceptions import InvalidToken
+from rest_framework_simplejwt.views import TokenRefreshView as BaseTokenRefreshView
 
 from .models import User
 from .serializers import RegisterSerializer, UserProfileSerializer
+
+
+class TokenRefreshView(BaseTokenRefreshView):
+    def post(self, request, *args, **kwargs):
+        try:
+            return super().post(request, *args, **kwargs)
+        except User.DoesNotExist as err:
+            raise InvalidToken("User no longer exists") from err
 
 
 class RegisterView(generics.CreateAPIView):
