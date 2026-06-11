@@ -85,7 +85,7 @@
 
         <div class="card-identity">
           <div class="avatar-wrapper edit-avatar-wrapper">
-            <img [src]="getProfileImageUrl()" class="avatar" alt="Preview">
+            <img [src]="getPreviewOrProfileImage()" class="avatar" alt="Preview">
             <input type="file" #fileInput (change)="onFileSelected($event)" style="display:none" accept="image/*">
             <button type="button" class="change-photo-btn" (click)="fileInput.click()">
               📷 Zmień
@@ -127,5 +127,50 @@
       </form>
     </ng-template>
 
+  </div>
+</div>
+
+<!-- ── Crop Modal ──────────────────────────────────────────────── -->
+<div class="crop-overlay" *ngIf="showCropModal" (pointerup)="onCropPointerUp()" (pointermove)="onCropPointerMove($event)">
+  <div class="crop-modal" (click)="$event.stopPropagation()">
+
+    <h3 class="crop-title">Przytnij zdjęcie</h3>
+    <p class="crop-hint">Przeciągnij ramkę lub narożniki aby wybrać kwadratowy obszar</p>
+
+    <div class="crop-area" #cropAreaEl>
+      <img
+        #cropImgEl
+        [src]="cropSrc"
+        class="crop-img"
+        (load)="onCropImageLoad()"
+        draggable="false"
+      >
+
+      <div class="crop-shade"></div>
+
+      <div
+        class="crop-box"
+        [style.left.px]="cropBox.x"
+        [style.top.px]="cropBox.y"
+        [style.width.px]="cropBox.size"
+        [style.height.px]="cropBox.size"
+        (pointerdown)="onCropPointerDown($event, 'move')"
+      >
+        <div class="crop-guide-h" style="top:33.33%"></div>
+        <div class="crop-guide-h" style="top:66.66%"></div>
+        <div class="crop-guide-v" style="left:33.33%"></div>
+        <div class="crop-guide-v" style="left:66.66%"></div>
+
+        <div class="crop-corner crop-tl" (pointerdown)="onCropPointerDown($event, 'tl')"></div>
+        <div class="crop-corner crop-tr" (pointerdown)="onCropPointerDown($event, 'tr')"></div>
+        <div class="crop-corner crop-bl" (pointerdown)="onCropPointerDown($event, 'bl')"></div>
+        <div class="crop-corner crop-br" (pointerdown)="onCropPointerDown($event, 'br')"></div>
+      </div>
+    </div>
+
+    <div class="crop-actions">
+      <button class="crop-btn crop-btn-confirm" (click)="confirmCrop()">✓ Zatwierdź</button>
+      <button class="crop-btn crop-btn-cancel" (click)="cancelCrop()">Anuluj</button>
+    </div>
   </div>
 </div>
