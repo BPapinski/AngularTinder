@@ -5,6 +5,8 @@ import { finalize } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { DatingService } from '../../services/dating.service';
 import { NotificationService } from '../../services/notification.service';
+import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 export interface MatchItem {
   id: number;
@@ -20,7 +22,7 @@ export interface MatchItem {
 @Component({
   selector: 'app-matches',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, HttpClientModule],
   templateUrl: './matches.component.html',
   styleUrls: ['./matches.component.css'],
 })
@@ -29,11 +31,14 @@ export class MatchesComponent implements OnInit {
   matches: MatchItem[] = [];
   loading = signal<boolean>(false);
 
+  resetting = signal(false);
+
   constructor(
     public authService: AuthService,
     private datingService: DatingService,
     private router: Router,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private http: HttpClient,
   ) {}
 
   ngOnInit() {
@@ -66,5 +71,22 @@ export class MatchesComponent implements OnInit {
 
   goToChat(userId: number) {
     this.router.navigate(['/chat'], { queryParams: { userId: userId } });
+  }
+
+  resetMatches() {
+    if (!confirm('Usunąć wszystkie pary i polubienia? (tylko do testów)')) return;
+    this.resetting.set(true);
+    const token = this.authService.getToken();
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    this.http.delete(`${environment.apiUrl}/interactions/reset/`, { headers })
+      .pipe(finalize(() => this.resetting.set(false)))
+      .subscribe({
+        next: () => {
+          this.matches = [];
+          this.notificationService.newMatches.set(0);
+          this.notificationService.clearMatches();
+        },
+        error: () => alert('Błąd podczas usuwania par'),
+      });
   }
 }

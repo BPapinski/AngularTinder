@@ -45,4 +45,22 @@ export class LoginComponent {
   goToRegister() {
     this.router.navigate(['/register']);
   }
+
+  loginAs(email: string, password: string) {
+    this.loginForm.setValue({ email, password });
+    this.authService.login({ email, password }).subscribe({
+      next: () => {
+        this.errorMessage.set('');
+        this.router.navigate(['/']);
+      },
+      error: () => {
+        this.errorMessage.set('Nieprawidłowy email lub hasło');
+      }
+    });
+  }
+
+  readonly quickAccounts = [
+    { label: 'Admin', email: 'admin@admin.com', password: 'admin' },
+    { label: 'Anna', email: 'anna@example.com', password: 'password123' },
+  ];
 }

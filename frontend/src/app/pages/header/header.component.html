@@ -25,15 +25,33 @@
     <span class="badge" *ngIf="notificationService.newMatches() > 0">{{ notificationService.newMatches() }}</span>
   </a>
 
-  <a
-    routerLink="/chat"
-    routerLinkActive="active"
-    [routerLinkActiveOptions]="{ exact: true }"
-  >
-    <span class="nav-icon">💬</span>
-    <span class="nav-text">Chaty</span>
-    <span class="badge" *ngIf="notificationService.unreadMessages() > 0">{{ notificationService.unreadMessages() }}</span>
-  </a>
+  <div class="nav-dropdown-wrapper">
+    <a
+      routerLink="/chat"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      <span class="nav-icon">💬</span>
+      <span class="nav-text">Chaty</span>
+      <span class="badge" *ngIf="notificationService.unreadMessages() > 0">{{ notificationService.unreadMessages() }}</span>
+    </a>
+
+    <div class="nav-dropdown" *ngIf="unreadSenders().length > 0">
+      <div class="nav-dropdown-title">Nowe wiadomości</div>
+      <a
+        *ngFor="let s of unreadSenders()"
+        routerLink="/chat"
+        [queryParams]="{ userId: s.id }"
+        class="nav-dropdown-item"
+      >
+        <span class="sender-avatar">{{ s.name[0] }}</span>
+        <span class="sender-info">
+          <span class="sender-name">{{ s.name }}</span>
+          <span class="sender-count">{{ s.count }} {{ s.count === 1 ? 'wiadomość' : 'wiadomości' }}</span>
+        </span>
+      </a>
+    </div>
+  </div>
 </nav>
 
     <div class="user-section">

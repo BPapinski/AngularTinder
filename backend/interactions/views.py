@@ -1,3 +1,5 @@
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
@@ -22,6 +24,18 @@ class LikeUserView(APIView):
             return Response({"error": "You cannot like yourself"}, status=400)
 
         is_match = perform_like(request.user, target_user)
+
+        if is_match:
+            channel_layer = get_channel_layer()
+            for user, other in [(request.user, target_user), (target_user, request.user)]:
+                async_to_sync(channel_layer.group_send)(
+                    f"notifications_{user.id}",
+                    {
+                        "type": "new_match_notification",
+                        "with_user_id": other.id,
+                        "with_user_name": other.first_name,
+                    },
+                )
 
         return Response({"status": "liked", "is_match": is_match}, status=status.HTTP_200_OK)
 
@@ -56,3 +70,23 @@ class UserMatchesView(APIView):
 
         serializer = self.serializer_class(queryset, many=True, context={"request": request})
         return Response(serializer.data)
+
+
+class ResetMatchesView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request):
+        from interactions.models import Interaction
+
+        deleted_matches = Match.objects.filter(Q(user1=request.user) | Q(user2=request.user)).delete()[0]
+
+        deleted_interactions = Interaction.objects.filter(Q(user=request.user) | Q(target_user=request.user)).delete()[
+            0
+        ]
+
+        return Response(
+            {
+                "deleted_matches": deleted_matches,
+                "deleted_interactions": deleted_interactions,
+            }
+        )

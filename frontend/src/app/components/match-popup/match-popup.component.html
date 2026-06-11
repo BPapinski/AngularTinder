@@ -1,0 +1,15 @@
+@if (notificationService.matchPopup(); as popup) {
+  <div class="overlay" (click)="close()">
+    <div class="popup" (click)="$event.stopPropagation()">
+      <div class="hearts">❤️</div>
+      <h2 class="title">To jest para!</h2>
+      <p class="subtitle">
+        Ty i <strong>{{ popup.userName }}</strong> lubicie się nawzajem
+      </p>
+      <div class="actions">
+        <button class="btn btn-chat" (click)="goToChat()">Napisz wiadomość</button>
+        <button class="btn btn-close" (click)="close()">Może później</button>
+      </div>
+    </div>
+  </div>
+}
