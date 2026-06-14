@@ -142,10 +142,23 @@
   gap: 10px;
 }
 
-.bubble {
+.message-row {
   width: fit-content;
   max-width: 65%;
   min-width: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.message-row.mine {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.bubble {
+  width: 100%;
   padding: 12px 16px;
   border-radius: 16px;
   background: #fff;
@@ -153,13 +166,87 @@
   font-size: 14px;
   line-height: 1.4;
   word-break: break-word;
+  position: relative;
 }
 
 
-.bubble.mine {
-  align-self: flex-end;
+.message-row.mine .bubble {
   background: var(--primary);
   color: #fff;
+}
+
+.reaction-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.reaction-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  min-height: 20px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+  font-size: 12px;
+  line-height: 1;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.message-row.mine .reaction-pill {
+  background: rgba(255, 255, 255, 0.24);
+  color: #fff;
+  box-shadow: none;
+}
+
+.reaction-bar {
+  display: flex;
+  gap: 4px;
+  padding: 2px 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-2px);
+  transition: opacity 0.15s, transform 0.15s, visibility 0.15s;
+}
+
+.message-row:hover .reaction-bar,
+.message-row:focus-within .reaction-bar {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.reaction-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, transform 0.15s;
+}
+
+.reaction-btn:hover {
+  background: #f1f1f1;
+  transform: translateY(-1px);
+}
+
+.reaction-btn.active {
+  background: #ffe1e6;
+  box-shadow: inset 0 0 0 1px rgba(255, 88, 100, 0.35);
 }
 
 .input {

@@ -19,6 +19,12 @@ export class ChatComponent implements OnInit, OnDestroy {
   messages: any[] = [];
   selectedUser: any = null;
   newMessage = '';
+  reactionOptions = [
+    { key: 'thumbs_up', label: '👍' },
+    { key: 'thumbs_down', label: '👎' },
+    { key: 'heart', label: '❤️' },
+    { key: 'laugh', label: '😂' },
+  ];
 
   private messagesSubscription: Subscription | null = null;
 
@@ -49,7 +55,7 @@ export class ChatComponent implements OnInit, OnDestroy {
       const me = this.authService.currentUser();
       msg.is_me = me ? senderId === me.id : false;
 
-      this.messages.push(msg);
+      this.messages.push(this.normalizeMessageForView(msg));
       this.cdr.detectChanges();
       this.scrollToBottom();
 
@@ -91,10 +97,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.chatService.getMessagesHistory(user.id).subscribe(res => {
       const me = this.authService.currentUser();
 
-      this.messages = res.map(msg => ({
-        ...msg,
-        is_me: me ? msg.sender.id === me.id : false
-      }));
+      this.messages = res.map(msg => this.normalizeMessageForView(msg, me?.id));
 
       this.cdr.detectChanges();
       this.scrollToBottom();
@@ -110,6 +113,32 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.newMessage = '';
   }
 
+  toggleReaction(message: any, reaction: string) {
+    if (!message?.id) return;
+
+    const request$ = message.my_reaction === reaction
+      ? this.chatService.removeReaction(message.id)
+      : this.chatService.setReaction(message.id, reaction);
+
+    request$.subscribe({
+      next: (updatedMessage) => this.replaceMessage(this.normalizeMessageForView(updatedMessage)),
+      error: (err) => console.error('Failed to update reaction:', err),
+    });
+  }
+
+  getReactionLabel(reaction: string): string {
+    return this.reactionOptions.find(option => option.key === reaction)?.label || reaction;
+  }
+
+  getVisibleReactions(message: any): string[] {
+    const reactions = message.reactions || [];
+    return Array.from(new Set(reactions.map((item: any) => item.reaction)));
+  }
+
+  getReactionCount(message: any, reaction: string): number {
+    return (message.reactions || []).filter((item: any) => item.reaction === reaction).length;
+  }
+
   scrollToBottom(): void {
     setTimeout(() => {
       if (this.messagesContainer) {
@@ -123,5 +152,29 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.chatService.disconnect();
     this.notificationService.activeChatUserId.set(null);
     this.messagesSubscription?.unsubscribe();
+  }
+
+  private normalizeMessageForView(message: any, currentUserId?: number) {
+    const me = this.authService.currentUser();
+    const meId = currentUserId ?? me?.id;
+    const senderId = message.sender?.id;
+
+    return {
+      ...message,
+      reactions: message.reactions || [],
+      my_reaction: message.my_reaction || null,
+      is_me: meId ? senderId === meId : message.is_me || false,
+    };
+  }
+
+  private replaceMessage(updatedMessage: any) {
+    const index = this.messages.findIndex(message => message.id === updatedMessage.id);
+    if (index === -1) return;
+
+    this.messages[index] = {
+      ...this.messages[index],
+      ...updatedMessage,
+    };
+    this.cdr.detectChanges();
   }
 }

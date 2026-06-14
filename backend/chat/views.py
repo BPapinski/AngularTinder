@@ -1,12 +1,14 @@
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
 from interactions.models import Match
+from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from users.models import User
 
-from .models import ChatMessage
+from .models import ChatMessage, ChatMessageReaction
 from .serializers import ChatMessageSerializer, UserShortSerializer
 
 
@@ -44,7 +46,7 @@ class ChatMessagesView(APIView):
 
         messages = ChatMessage.objects.filter(sender__in=[user, other], receiver__in=[user, other])
 
-        serializer = ChatMessageSerializer(messages, many=True)
+        serializer = ChatMessageSerializer(messages, many=True, context={"request": request})
         return Response(serializer.data)
 
 
@@ -104,4 +106,37 @@ class SendMessageView(APIView):
 
         msg = ChatMessage.objects.create(sender=sender, receiver=receiver, content=content)
 
-        return Response(ChatMessageSerializer(msg).data)
+        return Response(ChatMessageSerializer(msg, context={"request": request}).data)
+
+
+class MessageReactionView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, message_id):
+        message = get_object_or_404(ChatMessage, id=message_id)
+        self._check_participant(request.user, message)
+
+        reaction = request.data.get("reaction")
+        valid_reactions = {choice[0] for choice in ChatMessageReaction.Reaction.choices}
+        if reaction not in valid_reactions:
+            return Response({"reaction": "Nieprawidlowa reakcja."}, status=status.HTTP_400_BAD_REQUEST)
+
+        ChatMessageReaction.objects.update_or_create(
+            message=message,
+            user=request.user,
+            defaults={"reaction": reaction},
+        )
+
+        message.refresh_from_db()
+        return Response(ChatMessageSerializer(message, context={"request": request}).data)
+
+    def delete(self, request, message_id):
+        message = get_object_or_404(ChatMessage, id=message_id)
+        self._check_participant(request.user, message)
+
+        ChatMessageReaction.objects.filter(message=message, user=request.user).delete()
+        return Response(ChatMessageSerializer(message, context={"request": request}).data)
+
+    def _check_participant(self, user, message):
+        if message.sender_id != user.id and message.receiver_id != user.id:
+            raise PermissionDenied("Nie mozesz reagowac na te wiadomosc.")

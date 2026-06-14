@@ -63,6 +63,27 @@ export class ChatService {
       });
   }
 
+  setReaction(messageId: number, reaction: string): Observable<any> {
+    const token = localStorage.getItem('access_token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+
+    return this.http.post<any>(
+      `${environment.apiUrl}/chat/messages/${messageId}/reaction/`,
+      { reaction },
+      { headers },
+    );
+  }
+
+  removeReaction(messageId: number): Observable<any> {
+    const token = localStorage.getItem('access_token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+
+    return this.http.delete<any>(
+      `${environment.apiUrl}/chat/messages/${messageId}/reaction/`,
+      { headers },
+    );
+  }
+
   markRead(userId: number): void {
     const token = localStorage.getItem('access_token');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);

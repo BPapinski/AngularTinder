@@ -214,6 +214,16 @@
   font-size: 13px;
 }
 
+.btn-danger-solid {
+  background: #e53935;
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(229, 57, 53, 0.25);
+}
+
+.btn-danger-solid:hover {
+  background: #c62828;
+}
+
 .loading-state {
   margin-top: 50px;
 }
@@ -235,6 +245,98 @@
   animation: fadeIn 0.3s ease;
 }
 
+.settings-container {
+  animation: fadeIn 0.3s ease;
+}
+
+.danger-zone {
+  border: 1px solid #ffd2d2;
+  background: #fff7f7;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.danger-zone h3 {
+  margin: 0 0 8px;
+  color: #c62828;
+  font-size: 16px;
+}
+
+.danger-zone p {
+  margin: 0 0 16px;
+  color: #666;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.delete-account-form {
+  margin: 0;
+}
+
+.settings-error {
+  background: #ffe6e6;
+  color: #b71c1c;
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 12px;
+  font-size: 13px;
+}
+
+.delete-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.62);
+  z-index: 2100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeIn 0.15s ease;
+}
+
+.delete-confirm-modal {
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+  text-align: center;
+}
+
+.delete-confirm-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #ffe6e6;
+  color: #c62828;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 24px;
+  margin-bottom: 12px;
+}
+
+.delete-confirm-modal h3 {
+  margin: 0 0 8px;
+  color: #222;
+  font-size: 20px;
+}
+
+.delete-confirm-modal p {
+  margin: 0 0 20px;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.delete-confirm-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .edit-title {
   text-align: center;
   margin-bottom: 20px;
@@ -245,6 +347,12 @@
 .form-group {
   margin-bottom: 15px;
   text-align: left;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
 }
 
 .form-group label {
@@ -439,3 +547,10 @@
   color: #555;
 }
 .crop-btn-cancel:hover { background: #eaeaea; }
+
+@media (max-width: 420px) {
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}

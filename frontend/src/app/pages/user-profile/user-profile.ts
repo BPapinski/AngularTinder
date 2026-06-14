@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService, UserProfile } from '../../services/auth.service';
 
 @Component({
@@ -17,16 +17,22 @@ export class UserProfileComponent implements OnInit {
   private location = inject(Location);
   private cdr = inject(ChangeDetectorRef);
   private fb = inject(FormBuilder);
+  private router = inject(Router);
 
   user: UserProfile | null = null;
   loading = true;
   isOwnProfile = false;
 
   isEditing = false;
+  isSettingsOpen = false;
   editForm!: FormGroup;
+  deleteAccountForm!: FormGroup;
   selectedFile: File | null = null;
   previewUrl: string | null = null;
   submitting = false;
+  deletingAccount = false;
+  deleteAccountError = '';
+  showDeleteConfirmModal = false;
 
   // ── Crop modal ──────────────────────────────────────────────────────────────
   showCropModal = false;
@@ -66,21 +72,54 @@ export class UserProfileComponent implements OnInit {
       first_name: ['', [Validators.required, Validators.minLength(2)]],
       bio: ['', [Validators.maxLength(500)]],
       gender: [''],
+      gender_preference: ['A', Validators.required],
+      min_preferred_age: [18, [Validators.required, Validators.min(18)]],
+      max_preferred_age: [null as number | null, [Validators.min(18)]],
+    }, {
+      validators: this.preferredAgeRangeValidator,
+    });
+
+    this.deleteAccountForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', Validators.required],
     });
   }
 
   startEditing() {
     if (!this.user) return;
     this.isEditing = true;
+    this.isSettingsOpen = false;
     this.selectedFile = null;
     this.previewUrl = null;
-    this.editForm.patchValue({ first_name: this.user.first_name, bio: this.user.bio, gender: this.user.gender });
+    this.editForm.patchValue({
+      first_name: this.user.first_name,
+      bio: this.user.bio,
+      gender: this.user.gender,
+      gender_preference: this.user.gender_preference || 'A',
+      min_preferred_age: this.user.min_preferred_age ?? 18,
+      max_preferred_age: this.user.max_preferred_age ?? null,
+    });
   }
 
   cancelEditing() {
     this.isEditing = false;
     this.selectedFile = null;
     this.previewUrl = null;
+  }
+
+  openSettings() {
+    if (!this.user) return;
+    this.isSettingsOpen = true;
+    this.isEditing = false;
+    this.deleteAccountError = '';
+    this.deleteAccountForm.reset({ email: '', password: '' });
+  }
+
+  closeSettings() {
+    this.isSettingsOpen = false;
+    this.deleteAccountError = '';
+    this.showDeleteConfirmModal = false;
+    this.deleteAccountForm.reset({ email: '', password: '' });
   }
 
   // ── File selection → open crop ───────────────────────────────────────────────
@@ -223,6 +262,9 @@ export class UserProfileComponent implements OnInit {
     formData.append('first_name', this.editForm.get('first_name')?.value);
     formData.append('bio', this.editForm.get('bio')?.value || '');
     formData.append('gender', this.editForm.get('gender')?.value);
+    formData.append('gender_preference', this.editForm.get('gender_preference')?.value);
+    formData.append('min_preferred_age', this.editForm.get('min_preferred_age')?.value ?? '');
+    formData.append('max_preferred_age', this.editForm.get('max_preferred_age')?.value ?? '');
 
     if (this.selectedFile) {
       formData.append('profile_image', this.selectedFile);
@@ -240,6 +282,42 @@ export class UserProfileComponent implements OnInit {
         console.error('Błąd zapisu', err);
         this.submitting = false;
         alert('Nie udało się zapisać zmian.');
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  deleteAccount() {
+    if (this.deleteAccountForm.invalid || this.deletingAccount) {
+      this.deleteAccountForm.markAllAsTouched();
+      return;
+    }
+
+    this.showDeleteConfirmModal = true;
+  }
+
+  closeDeleteConfirmModal() {
+    if (this.deletingAccount) return;
+    this.showDeleteConfirmModal = false;
+  }
+
+  confirmDeleteAccount() {
+    if (this.deleteAccountForm.invalid || this.deletingAccount) return;
+    this.deletingAccount = true;
+    this.deleteAccountError = '';
+
+    this.authService.deleteAccount({
+      email: this.deleteAccountForm.get('email')?.value,
+      password: this.deleteAccountForm.get('password')?.value,
+    }).subscribe({
+      next: () => {
+        this.deletingAccount = false;
+        this.router.navigate(['/register']);
+      },
+      error: (err) => {
+        this.deletingAccount = false;
+        this.showDeleteConfirmModal = false;
+        this.deleteAccountError = this.getDeleteAccountError(err);
         this.cdr.detectChanges();
       }
     });
@@ -272,7 +350,49 @@ export class UserProfileComponent implements OnInit {
   getGenderLabel(code?: string): string {
     if (code === 'M') return 'Mężczyzna';
     if (code === 'F') return 'Kobieta';
+    if (code === 'O') return 'Inna';
     return 'Nie podano';
+  }
+
+  getGenderPreferenceLabel(code?: string): string {
+    if (code === 'M') return 'Mężczyzn';
+    if (code === 'F') return 'Kobiet';
+    return 'Dowolnie';
+  }
+
+  getPreferredAgeLabel(): string {
+    const min = this.user?.min_preferred_age;
+    const max = this.user?.max_preferred_age;
+
+    if (min && max) return `${min}-${max} lat`;
+    if (min) return `Od ${min} lat`;
+    if (max) return `Do ${max} lat`;
+    return 'Dowolny';
+  }
+
+  private preferredAgeRangeValidator(control: AbstractControl) {
+    const min = control.get('min_preferred_age')?.value;
+    const max = control.get('max_preferred_age')?.value;
+
+    if (min == null || max == null || max === '') {
+      return null;
+    }
+
+    return Number(max) < Number(min) ? { preferredAgeRange: true } : null;
+  }
+
+  private getDeleteAccountError(err: any): string {
+    const body = err?.error;
+
+    if (!body) return 'Nie udało się usunąć konta.';
+    if (typeof body === 'string') return body;
+    if (body.detail) return String(body.detail);
+
+    const messages = Object.values(body)
+      .flat()
+      .map(value => String(value));
+
+    return messages.length ? messages.join(' ') : 'Nie udało się usunąć konta.';
   }
 
   goBack() {
