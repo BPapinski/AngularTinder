@@ -110,3 +110,19 @@ class UserProfileSerializer(serializers.ModelSerializer):
             )
 
         return attrs
+
+
+class AccountDeleteSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True, trim_whitespace=False)
+
+    def validate(self, attrs):
+        user = self.context["request"].user
+
+        if attrs["email"].lower() != user.email.lower():
+            raise serializers.ValidationError({"email": "Podany email nie pasuje do konta."})
+
+        if not user.check_password(attrs["password"]):
+            raise serializers.ValidationError({"password": "Podane haslo jest nieprawidlowe."})
+
+        return attrs

@@ -214,6 +214,16 @@
   font-size: 13px;
 }
 
+.btn-danger-solid {
+  background: #e53935;
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(229, 57, 53, 0.25);
+}
+
+.btn-danger-solid:hover {
+  background: #c62828;
+}
+
 .loading-state {
   margin-top: 50px;
 }
@@ -233,6 +243,43 @@
 
 .edit-form-container {
   animation: fadeIn 0.3s ease;
+}
+
+.settings-container {
+  animation: fadeIn 0.3s ease;
+}
+
+.danger-zone {
+  border: 1px solid #ffd2d2;
+  background: #fff7f7;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.danger-zone h3 {
+  margin: 0 0 8px;
+  color: #c62828;
+  font-size: 16px;
+}
+
+.danger-zone p {
+  margin: 0 0 16px;
+  color: #666;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.delete-account-form {
+  margin: 0;
+}
+
+.settings-error {
+  background: #ffe6e6;
+  color: #b71c1c;
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 12px;
+  font-size: 13px;
 }
 
 .edit-title {

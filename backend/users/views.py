@@ -9,7 +9,7 @@ from rest_framework_simplejwt.exceptions import InvalidToken
 from rest_framework_simplejwt.views import TokenRefreshView as BaseTokenRefreshView
 
 from .models import User
-from .serializers import RegisterSerializer, UserProfileSerializer
+from .serializers import AccountDeleteSerializer, RegisterSerializer, UserProfileSerializer
 
 
 class TokenRefreshView(BaseTokenRefreshView):
@@ -30,6 +30,17 @@ class ProtectedTestView(APIView):
 
     def get(self, request):
         return Response({"message": "Authorized access works", "user": request.user.email})
+
+
+class AccountDeleteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = AccountDeleteSerializer(data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+
+        request.user.delete()
+        return Response({"detail": "Konto zostalo usuniete."}, status=status.HTTP_200_OK)
 
 
 class UserProfileView(GenericAPIView):

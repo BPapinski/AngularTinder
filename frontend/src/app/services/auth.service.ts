@@ -169,4 +169,25 @@ export class AuthService {
       })
     );
   }
+
+  deleteAccount(credentials: { email: string; password: string }): Observable<{ detail: string }> {
+    const url = `${this.baseUrl}/users/me/delete/`;
+
+    return this.authFetch<UserProfile>('/users/me/').pipe(
+      switchMap(() => {
+        const token = localStorage.getItem('access_token');
+        let headers = new HttpHeaders();
+        if (token) {
+          headers = headers.set('Authorization', `Bearer ${token}`);
+        }
+
+        return this.http.post<{ detail: string }>(url, credentials, { headers });
+      }),
+      tap(() => {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        this.currentUser.set(null);
+      })
+    );
+  }
 }

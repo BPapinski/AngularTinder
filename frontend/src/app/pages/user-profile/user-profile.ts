@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService, UserProfile } from '../../services/auth.service';
 
@@ -17,16 +17,21 @@ export class UserProfileComponent implements OnInit {
   private location = inject(Location);
   private cdr = inject(ChangeDetectorRef);
   private fb = inject(FormBuilder);
+  private router = inject(Router);
 
   user: UserProfile | null = null;
   loading = true;
   isOwnProfile = false;
 
   isEditing = false;
+  isSettingsOpen = false;
   editForm!: FormGroup;
+  deleteAccountForm!: FormGroup;
   selectedFile: File | null = null;
   previewUrl: string | null = null;
   submitting = false;
+  deletingAccount = false;
+  deleteAccountError = '';
 
   // ── Crop modal ──────────────────────────────────────────────────────────────
   showCropModal = false;
@@ -72,11 +77,17 @@ export class UserProfileComponent implements OnInit {
     }, {
       validators: this.preferredAgeRangeValidator,
     });
+
+    this.deleteAccountForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', Validators.required],
+    });
   }
 
   startEditing() {
     if (!this.user) return;
     this.isEditing = true;
+    this.isSettingsOpen = false;
     this.selectedFile = null;
     this.previewUrl = null;
     this.editForm.patchValue({
@@ -93,6 +104,20 @@ export class UserProfileComponent implements OnInit {
     this.isEditing = false;
     this.selectedFile = null;
     this.previewUrl = null;
+  }
+
+  openSettings() {
+    if (!this.user) return;
+    this.isSettingsOpen = true;
+    this.isEditing = false;
+    this.deleteAccountError = '';
+    this.deleteAccountForm.reset({ email: '', password: '' });
+  }
+
+  closeSettings() {
+    this.isSettingsOpen = false;
+    this.deleteAccountError = '';
+    this.deleteAccountForm.reset({ email: '', password: '' });
   }
 
   // ── File selection → open crop ───────────────────────────────────────────────
@@ -260,6 +285,37 @@ export class UserProfileComponent implements OnInit {
     });
   }
 
+  deleteAccount() {
+    if (this.deleteAccountForm.invalid || this.deletingAccount) {
+      this.deleteAccountForm.markAllAsTouched();
+      return;
+    }
+
+    const confirmed = window.confirm(
+      'Czy na pewno chcesz usunąć konto? Tej operacji nie można cofnąć.'
+    );
+
+    if (!confirmed) return;
+
+    this.deletingAccount = true;
+    this.deleteAccountError = '';
+
+    this.authService.deleteAccount({
+      email: this.deleteAccountForm.get('email')?.value,
+      password: this.deleteAccountForm.get('password')?.value,
+    }).subscribe({
+      next: () => {
+        this.deletingAccount = false;
+        this.router.navigate(['/register']);
+      },
+      error: (err) => {
+        this.deletingAccount = false;
+        this.deleteAccountError = this.getDeleteAccountError(err);
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
   // ── Helpers ──────────────────────────────────────────────────────────────────
   getPreviewOrProfileImage(): string {
     if (this.previewUrl) return this.previewUrl;
@@ -316,6 +372,20 @@ export class UserProfileComponent implements OnInit {
     }
 
     return Number(max) < Number(min) ? { preferredAgeRange: true } : null;
+  }
+
+  private getDeleteAccountError(err: any): string {
+    const body = err?.error;
+
+    if (!body) return 'Nie udało się usunąć konta.';
+    if (typeof body === 'string') return body;
+    if (body.detail) return String(body.detail);
+
+    const messages = Object.values(body)
+      .flat()
+      .map(value => String(value));
+
+    return messages.length ? messages.join(' ') : 'Nie udało się usunąć konta.';
   }
 
   goBack() {
