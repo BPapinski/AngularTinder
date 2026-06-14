@@ -21,6 +21,9 @@ export interface UserProfile {
   email: string;
   first_name: string;
   gender?: string;
+  gender_preference?: string;
+  min_preferred_age?: number | null;
+  max_preferred_age?: number | null;
   birth_date?: string;
   age?: number;
   bio?: string;

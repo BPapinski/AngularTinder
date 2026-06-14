@@ -58,6 +58,20 @@
             </div>
           </div>
           <div class="info-item" *ngIf="isOwnProfile">
+            <span class="icon">🔎</span>
+            <div class="text">
+              <span class="label">Szukam</span>
+              <span class="val">{{ getGenderPreferenceLabel(user.gender_preference) }}</span>
+            </div>
+          </div>
+          <div class="info-item" *ngIf="isOwnProfile">
+            <span class="icon">🎯</span>
+            <div class="text">
+              <span class="label">Preferowany wiek</span>
+              <span class="val">{{ getPreferredAgeLabel() }}</span>
+            </div>
+          </div>
+          <div class="info-item" *ngIf="isOwnProfile">
             <span class="icon">✉️</span>
             <div class="text">
               <span class="label">Email</span>
@@ -107,7 +121,29 @@
               <option value="">Wybierz...</option>
               <option value="M">Mężczyzna</option>
               <option value="F">Kobieta</option>
+              <option value="O">Inna</option>
             </select>
+          </div>
+
+          <div class="form-group">
+            <label>Szukam</label>
+            <select formControlName="gender_preference">
+              <option value="M">Mężczyzn</option>
+              <option value="F">Kobiet</option>
+              <option value="A">Dowolnie</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Min. wiek</label>
+              <input type="number" formControlName="min_preferred_age" min="18" max="120">
+            </div>
+
+            <div class="form-group">
+              <label>Maks. wiek</label>
+              <input type="number" formControlName="max_preferred_age" min="18" max="120">
+            </div>
           </div>
 
           <div class="form-group">

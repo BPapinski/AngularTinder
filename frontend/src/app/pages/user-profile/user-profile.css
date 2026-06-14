@@ -247,6 +247,12 @@
   text-align: left;
 }
 
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
 .form-group label {
   display: block;
   font-size: 12px;
@@ -439,3 +445,10 @@
   color: #555;
 }
 .crop-btn-cancel:hover { background: #eaeaea; }
+
+@media (max-width: 420px) {
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}

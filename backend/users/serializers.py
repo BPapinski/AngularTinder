@@ -59,6 +59,16 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "age",
             "bio",
             "profile_image",
+            "gender_preference",
+            "min_preferred_age",
+            "max_preferred_age",
             "created_at",
         ]
         read_only_fields = ["id", "created_at", "email"]
+
+    def to_internal_value(self, data):
+        data = data.copy()
+        for field in ("min_preferred_age", "max_preferred_age"):
+            if data.get(field) == "":
+                data[field] = None
+        return super().to_internal_value(data)

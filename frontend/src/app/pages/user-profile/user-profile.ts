@@ -66,6 +66,9 @@ export class UserProfileComponent implements OnInit {
       first_name: ['', [Validators.required, Validators.minLength(2)]],
       bio: ['', [Validators.maxLength(500)]],
       gender: [''],
+      gender_preference: ['A', Validators.required],
+      min_preferred_age: [null as number | null],
+      max_preferred_age: [null as number | null],
     });
   }
 
@@ -74,7 +77,14 @@ export class UserProfileComponent implements OnInit {
     this.isEditing = true;
     this.selectedFile = null;
     this.previewUrl = null;
-    this.editForm.patchValue({ first_name: this.user.first_name, bio: this.user.bio, gender: this.user.gender });
+    this.editForm.patchValue({
+      first_name: this.user.first_name,
+      bio: this.user.bio,
+      gender: this.user.gender,
+      gender_preference: this.user.gender_preference || 'A',
+      min_preferred_age: this.user.min_preferred_age ?? null,
+      max_preferred_age: this.user.max_preferred_age ?? null,
+    });
   }
 
   cancelEditing() {
@@ -223,6 +233,9 @@ export class UserProfileComponent implements OnInit {
     formData.append('first_name', this.editForm.get('first_name')?.value);
     formData.append('bio', this.editForm.get('bio')?.value || '');
     formData.append('gender', this.editForm.get('gender')?.value);
+    formData.append('gender_preference', this.editForm.get('gender_preference')?.value);
+    formData.append('min_preferred_age', this.editForm.get('min_preferred_age')?.value ?? '');
+    formData.append('max_preferred_age', this.editForm.get('max_preferred_age')?.value ?? '');
 
     if (this.selectedFile) {
       formData.append('profile_image', this.selectedFile);
@@ -272,7 +285,24 @@ export class UserProfileComponent implements OnInit {
   getGenderLabel(code?: string): string {
     if (code === 'M') return 'Mężczyzna';
     if (code === 'F') return 'Kobieta';
+    if (code === 'O') return 'Inna';
     return 'Nie podano';
+  }
+
+  getGenderPreferenceLabel(code?: string): string {
+    if (code === 'M') return 'Mężczyzn';
+    if (code === 'F') return 'Kobiet';
+    return 'Dowolnie';
+  }
+
+  getPreferredAgeLabel(): string {
+    const min = this.user?.min_preferred_age;
+    const max = this.user?.max_preferred_age;
+
+    if (min && max) return `${min}-${max} lat`;
+    if (min) return `Od ${min} lat`;
+    if (max) return `Do ${max} lat`;
+    return 'Dowolny';
   }
 
   goBack() {
