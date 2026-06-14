@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 
 from users.models import User
 
@@ -42,11 +42,18 @@ def get_dating_feed(user):
     today = date.today()
 
     if user.min_preferred_age is not None:
-        max_birth_date = date(
-            today.year - user.min_preferred_age,
-            today.month,
-            today.day,
-        )
+        max_birth_date = subtract_years(today, user.min_preferred_age)
         profiles = profiles.filter(birth_date__lte=max_birth_date)
 
+    if user.max_preferred_age is not None:
+        min_birth_date = subtract_years(today, user.max_preferred_age + 1) + timedelta(days=1)
+        profiles = profiles.filter(birth_date__gte=min_birth_date)
+
     return profiles
+
+
+def subtract_years(value, years):
+    try:
+        return value.replace(year=value.year - years)
+    except ValueError:
+        return value.replace(year=value.year - years, day=28)
