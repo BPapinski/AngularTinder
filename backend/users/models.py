@@ -29,6 +29,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     gender_preference = models.CharField(max_length=1, choices=GenderPreference.choices, default=GenderPreference.ANY)
 
     min_preferred_age = models.PositiveSmallIntegerField(
+        default=18,
         null=True,
         blank=True,
         help_text="Minimalny wiek partnera",

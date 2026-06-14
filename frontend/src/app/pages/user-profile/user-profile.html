@@ -142,7 +142,12 @@
 
             <div class="form-group">
               <label>Maks. wiek</label>
-              <input type="number" formControlName="max_preferred_age" min="18" max="120">
+              <input
+                type="number"
+                formControlName="max_preferred_age"
+                [min]="editForm.get('min_preferred_age')?.value || 18"
+                max="120"
+              >
             </div>
           </div>
 

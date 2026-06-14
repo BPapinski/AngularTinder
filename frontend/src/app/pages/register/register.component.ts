@@ -28,8 +28,10 @@ export class RegisterComponent {
     gender_preference: ['A', Validators.required],
     birth_date: ['', Validators.required],
     bio: ['', Validators.maxLength(500)],
-    min_preferred_age: [null as number | null],
-    max_preferred_age: [null as number | null],
+    min_preferred_age: [18, [Validators.required, Validators.min(18)]],
+    max_preferred_age: [null as number | null, [Validators.min(18)]],
+  }, {
+    validators: this.preferredAgeRangeValidator,
   });
 
   onSubmit() {
@@ -85,6 +87,10 @@ export class RegisterComponent {
       }
     });
 
+    if (this.registerForm.errors?.['preferredAgeRange']) {
+      messages.push('Maks. wiek nie może być mniejszy niż min. wiek');
+    }
+
     return messages.length
       ? messages.join(' · ')
       : 'Uzupełnij wszystkie wymagane pola.';
@@ -101,8 +107,22 @@ export class RegisterComponent {
     if (control.errors['maxlength']) {
       return `maksymalnie ${control.errors['maxlength'].requiredLength} znaków`;
     }
+    if (control.errors['min']) {
+      return `minimum ${control.errors['min'].min}`;
+    }
 
     return 'nieprawidłowa wartość';
+  }
+
+  private preferredAgeRangeValidator(control: AbstractControl) {
+    const min = control.get('min_preferred_age')?.value;
+    const max = control.get('max_preferred_age')?.value;
+
+    if (min == null || max == null || max === '') {
+      return null;
+    }
+
+    return Number(max) < Number(min) ? { preferredAgeRange: true } : null;
   }
 
   private parseApiError(err: HttpErrorResponse): string {

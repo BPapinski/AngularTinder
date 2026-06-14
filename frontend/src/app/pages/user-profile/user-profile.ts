@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService, UserProfile } from '../../services/auth.service';
 
 @Component({
@@ -67,8 +67,10 @@ export class UserProfileComponent implements OnInit {
       bio: ['', [Validators.maxLength(500)]],
       gender: [''],
       gender_preference: ['A', Validators.required],
-      min_preferred_age: [null as number | null],
-      max_preferred_age: [null as number | null],
+      min_preferred_age: [18, [Validators.required, Validators.min(18)]],
+      max_preferred_age: [null as number | null, [Validators.min(18)]],
+    }, {
+      validators: this.preferredAgeRangeValidator,
     });
   }
 
@@ -82,7 +84,7 @@ export class UserProfileComponent implements OnInit {
       bio: this.user.bio,
       gender: this.user.gender,
       gender_preference: this.user.gender_preference || 'A',
-      min_preferred_age: this.user.min_preferred_age ?? null,
+      min_preferred_age: this.user.min_preferred_age ?? 18,
       max_preferred_age: this.user.max_preferred_age ?? null,
     });
   }
@@ -303,6 +305,17 @@ export class UserProfileComponent implements OnInit {
     if (min) return `Od ${min} lat`;
     if (max) return `Do ${max} lat`;
     return 'Dowolny';
+  }
+
+  private preferredAgeRangeValidator(control: AbstractControl) {
+    const min = control.get('min_preferred_age')?.value;
+    const max = control.get('max_preferred_age')?.value;
+
+    if (min == null || max == null || max === '') {
+      return null;
+    }
+
+    return Number(max) < Number(min) ? { preferredAgeRange: true } : null;
   }
 
   goBack() {
