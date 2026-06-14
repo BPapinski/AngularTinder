@@ -32,6 +32,7 @@ export class UserProfileComponent implements OnInit {
   submitting = false;
   deletingAccount = false;
   deleteAccountError = '';
+  showDeleteConfirmModal = false;
 
   // ── Crop modal ──────────────────────────────────────────────────────────────
   showCropModal = false;
@@ -117,6 +118,7 @@ export class UserProfileComponent implements OnInit {
   closeSettings() {
     this.isSettingsOpen = false;
     this.deleteAccountError = '';
+    this.showDeleteConfirmModal = false;
     this.deleteAccountForm.reset({ email: '', password: '' });
   }
 
@@ -291,12 +293,16 @@ export class UserProfileComponent implements OnInit {
       return;
     }
 
-    const confirmed = window.confirm(
-      'Czy na pewno chcesz usunąć konto? Tej operacji nie można cofnąć.'
-    );
+    this.showDeleteConfirmModal = true;
+  }
 
-    if (!confirmed) return;
+  closeDeleteConfirmModal() {
+    if (this.deletingAccount) return;
+    this.showDeleteConfirmModal = false;
+  }
 
+  confirmDeleteAccount() {
+    if (this.deleteAccountForm.invalid || this.deletingAccount) return;
     this.deletingAccount = true;
     this.deleteAccountError = '';
 
@@ -310,6 +316,7 @@ export class UserProfileComponent implements OnInit {
       },
       error: (err) => {
         this.deletingAccount = false;
+        this.showDeleteConfirmModal = false;
         this.deleteAccountError = this.getDeleteAccountError(err);
         this.cdr.detectChanges();
       }
