@@ -41,10 +41,32 @@
       <div class="messages" #messagesContainer>
   <div
     *ngFor="let msg of messages"
-    class="bubble"
+    class="message-row"
     [class.mine]="msg.is_me"
   >
-    {{ msg.content }}
+    <div class="bubble">
+      {{ msg.content }}
+
+      <div class="reaction-summary" *ngIf="getVisibleReactions(msg).length">
+        <span class="reaction-pill" *ngFor="let reaction of getVisibleReactions(msg)">
+          {{ getReactionLabel(reaction) }}
+          <span *ngIf="getReactionCount(msg, reaction) > 1">{{ getReactionCount(msg, reaction) }}</span>
+        </span>
+      </div>
+    </div>
+
+    <div class="reaction-bar" aria-label="Reakcje do wiadomości">
+      <button
+        *ngFor="let option of reactionOptions"
+        type="button"
+        class="reaction-btn"
+        [class.active]="msg.my_reaction === option.key"
+        (click)="toggleReaction(msg, option.key)"
+        [attr.aria-label]="'Zareaguj: ' + option.key"
+      >
+        {{ option.label }}
+      </button>
+    </div>
   </div>
 </div>
 
