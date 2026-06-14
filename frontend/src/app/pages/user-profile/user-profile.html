@@ -17,15 +17,39 @@
     <ng-container *ngIf="!isEditing && !isSettingsOpen; else activeModeTemplate">
 
       <div class="card-identity">
-        <div class="avatar-wrapper">
-          <img
-            [src]="getProfileImageUrl()"
-            alt="Profile"
-            class="avatar"
-            (error)="img.src='assets/placeholder-user.svg'" #img
-          />
-          <div class="online-indicator"></div>
+        <div class="profile-gallery" *ngIf="viewPhotos.length; else profileAvatarFallback">
+          <img [src]="viewPhotos[viewPhotoIndex]" alt="Profile" class="gallery-image" />
+          <button
+            type="button"
+            class="gallery-nav prev"
+            *ngIf="viewPhotos.length > 1"
+            (click)="showPreviousViewPhoto()"
+          >‹</button>
+          <button
+            type="button"
+            class="gallery-nav next"
+            *ngIf="viewPhotos.length > 1"
+            (click)="showNextViewPhoto()"
+          >›</button>
+          <div class="gallery-dots" *ngIf="viewPhotos.length > 1">
+            <span
+              *ngFor="let photo of viewPhotos; let i = index"
+              [class.active]="i === viewPhotoIndex"
+            ></span>
+          </div>
         </div>
+
+        <ng-template #profileAvatarFallback>
+          <div class="avatar-wrapper">
+            <img
+              [src]="getProfileImageUrl()"
+              alt="Profile"
+              class="avatar"
+              (error)="img.src='assets/placeholder-user.svg'" #img
+            />
+            <div class="online-indicator"></div>
+          </div>
+        </ng-template>
 
         <h1>
           {{ user.first_name }}
@@ -87,8 +111,17 @@
           </ng-container>
 
           <ng-template #otherUserActions>
-            <button class="btn btn-message">💬 Wyślij wiadomość</button>
-            <button class="btn btn-danger">🚫 Zgłoś / Usuń parę</button>
+            <ng-container *ngIf="isPartner">
+              <button type="button" class="btn btn-message" (click)="openChat()">💬 Wyślij wiadomość</button>
+              <button
+                type="button"
+                class="btn btn-danger"
+                (click)="removeMatch()"
+                [disabled]="removingMatch"
+              >
+                {{ removingMatch ? 'Usuwanie...' : 'Usuń parę' }}
+              </button>
+            </ng-container>
           </ng-template>
         </div>
       </div>
@@ -104,12 +137,48 @@
       <form [formGroup]="editForm" (ngSubmit)="saveProfile()" class="edit-form-container">
 
         <div class="card-identity">
-          <div class="avatar-wrapper edit-avatar-wrapper">
-            <img [src]="getPreviewOrProfileImage()" class="avatar" alt="Preview">
+          <div class="photos-editor">
+            <h3>Twoje zdjęcia</h3>
+            <p class="photos-hint">Pierwsze zdjęcie jest główne. Użyj strzałek, aby zmienić kolejność.</p>
+
+            <div class="photo-grid">
+              <div class="photo-item" *ngFor="let photo of sortedPhotos; let i = index">
+                <img [src]="photo.image" alt="Zdjęcie profilowe" />
+                <span class="photo-order" *ngIf="i === 0">Główne</span>
+                <div class="photo-actions">
+                  <button
+                    type="button"
+                    (click)="movePhotoEarlier(i)"
+                    [disabled]="i === 0 || photoActionId !== null"
+                    title="Przesuń wcześniej"
+                  >←</button>
+                  <button
+                    type="button"
+                    (click)="movePhotoLater(i)"
+                    [disabled]="i === sortedPhotos.length - 1 || photoActionId !== null"
+                    title="Przesuń później"
+                  >→</button>
+                  <button
+                    type="button"
+                    (click)="deletePhoto(photo.id)"
+                    [disabled]="photoActionId !== null"
+                    title="Usuń"
+                  >✕</button>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                class="photo-add"
+                *ngIf="canAddMorePhotos"
+                (click)="fileInput.click()"
+                [disabled]="photoUploading"
+              >
+                {{ photoUploading ? 'Dodawanie...' : '+ Dodaj zdjęcie' }}
+              </button>
+            </div>
+
             <input type="file" #fileInput (change)="onFileSelected($event)" style="display:none" accept="image/*">
-            <button type="button" class="change-photo-btn" (click)="fileInput.click()">
-              📷 Zmień
-            </button>
           </div>
         </div>
 

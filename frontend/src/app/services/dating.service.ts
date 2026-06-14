@@ -12,6 +12,7 @@ export interface DatingProfile {
   age: number;
   bio: string;
   profile_image: string | null;
+  photos: string[];
 }
 
 export interface MatchUser {
@@ -64,6 +65,13 @@ export class DatingService {
   getMatches(): Observable<MatchItem[]> {
     const url = `${this.apiUrl}/interactions/matches/`;
     return this.http.get<MatchItem[]>(url, { headers: this.getHeaders() }).pipe(
+      timeout(10000)
+    );
+  }
+
+  unmatch(userId: number): Observable<{ status: string }> {
+    const url = `${this.apiUrl}/interactions/unmatch/${userId}/`;
+    return this.http.delete<{ status: string }>(url, { headers: this.getHeaders() }).pipe(
       timeout(10000)
     );
   }

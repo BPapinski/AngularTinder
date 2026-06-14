@@ -4,7 +4,7 @@ import { ChatService } from '../../services/chat.service';
 import { FormsModule } from '@angular/forms';
 import { Subscription, Observable } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { NotificationService } from '../../services/notification.service';
 
@@ -35,6 +35,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     private authService: AuthService,
     private route: ActivatedRoute,
+    private router: Router,
     protected notificationService: NotificationService,
   ) {}
 
@@ -85,6 +86,13 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.notificationService.activeChatUserId.set(null);
     this.selectedUser = null;
     this.messages = [];
+  }
+
+  openPartnerProfile() {
+    if (!this.selectedUser) return;
+    this.router.navigate(['/profile', this.selectedUser.id], {
+      state: { fromMatch: true },
+    });
   }
 
   selectUser(user: any) {

@@ -31,6 +31,22 @@ def perform_dislike(sender, receiver):
     Interaction.objects.update_or_create(user=sender, target_user=receiver, defaults={"action": Interaction.DISLIKE})
 
 
+def perform_unmatch(user, other_user):
+    from django.db.models import Q
+
+    from chat.models import ChatMessage
+
+    u1, u2 = sorted([user, other_user], key=lambda u: u.pk)
+    Match.objects.filter(user1=u1, user2=u2).delete()
+
+    Interaction.objects.filter(user=user, target_user=other_user).delete()
+    Interaction.objects.filter(user=other_user, target_user=user).delete()
+
+    ChatMessage.objects.filter(
+        Q(sender=user, receiver=other_user) | Q(sender=other_user, receiver=user)
+    ).delete()
+
+
 def get_dating_feed(user):
     interacted_users_ids = Interaction.objects.filter(user=user).values_list("target_user_id", flat=True)
 
@@ -49,7 +65,7 @@ def get_dating_feed(user):
         min_birth_date = subtract_years(today, user.max_preferred_age + 1) + timedelta(days=1)
         profiles = profiles.filter(birth_date__gte=min_birth_date)
 
-    return profiles
+    return profiles.prefetch_related("photos")
 
 
 def subtract_years(value, years):

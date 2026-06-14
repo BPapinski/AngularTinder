@@ -32,10 +32,12 @@
     <ng-container *ngIf="selectedUser; else empty">
       <div class="chat-header">
         <button class="back-btn" (click)="goBack()">←</button>
-        <div class="avatar small">
-          <img [src]="getProfileImage(selectedUser.profile_image)" alt="" />
-        </div>
-        <h3>{{ selectedUser.first_name }}</h3>
+        <button type="button" class="chat-header-profile" (click)="openPartnerProfile()">
+          <div class="avatar small">
+            <img [src]="getProfileImage(selectedUser.profile_image)" alt="" />
+          </div>
+          <h3>{{ selectedUser.first_name }}</h3>
+        </button>
       </div>
 
       <div class="messages" #messagesContainer>

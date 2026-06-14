@@ -32,10 +32,34 @@
 
           <div class="card-image-wrapper">
             <img
-              *ngIf="profiles[0].profile_image; else placeholder"
-              [src]="profiles[0].profile_image"
+              *ngIf="activePhotos.length; else placeholder"
+              [src]="activePhotos[currentPhotoIndex]"
               alt="Profile"
             />
+            <button
+              type="button"
+              class="photo-nav prev"
+              *ngIf="activePhotos.length > 1"
+              (pointerdown)="$event.stopPropagation()"
+              (click)="showPreviousPhoto($event)"
+            >‹</button>
+            <button
+              type="button"
+              class="photo-nav next"
+              *ngIf="activePhotos.length > 1"
+              (pointerdown)="$event.stopPropagation()"
+              (click)="showNextPhoto($event)"
+            >›</button>
+            <div class="photo-dots" *ngIf="activePhotos.length > 1">
+              <button
+                type="button"
+                class="photo-dot"
+                *ngFor="let photo of activePhotos; let i = index"
+                [class.active]="i === currentPhotoIndex"
+                (pointerdown)="$event.stopPropagation()"
+                (click)="goToPhoto(i, $event)"
+              ></button>
+            </div>
             <ng-template #placeholder>
               <div class="placeholder-img">
                 {{ profiles[0].first_name.charAt(0) || '?' }}

@@ -1,8 +1,34 @@
 from datetime import date
 
+from interactions.models import Match
 from rest_framework import serializers
 
-from .models import User
+from .models import User, UserPhoto
+from .services import sync_user_profile_image
+
+
+class UserPhotoSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
+    class Meta:
+        model = UserPhoto
+        fields = ["id", "order", "image", "created_at"]
+        read_only_fields = ["id", "order", "created_at"]
+
+    def get_image(self, obj):
+        request = self.context.get("request")
+        if obj.image and request:
+            return request.build_absolute_uri(obj.image.url)
+        if obj.image:
+            return obj.image.url
+        return None
+
+
+class UserPhotoReorderSerializer(serializers.Serializer):
+    photo_ids = serializers.ListField(
+        child=serializers.IntegerField(min_value=1),
+        allow_empty=False,
+    )
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -63,11 +89,18 @@ class RegisterSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        return User.objects.create_user(**validated_data)
+        profile_image = validated_data.pop("profile_image", None)
+        user = User.objects.create_user(**validated_data)
+        if profile_image:
+            UserPhoto.objects.create(user=user, image=profile_image, order=0)
+            sync_user_profile_image(user)
+        return user
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
     age = serializers.ReadOnlyField()
+    photos = serializers.SerializerMethodField()
+    is_match = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -80,12 +113,29 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "age",
             "bio",
             "profile_image",
+            "photos",
+            "is_match",
             "gender_preference",
             "min_preferred_age",
             "max_preferred_age",
             "created_at",
         ]
-        read_only_fields = ["id", "created_at", "email"]
+        read_only_fields = ["id", "created_at", "email", "photos", "is_match"]
+
+    def get_photos(self, obj):
+        return UserPhotoSerializer(obj.photos.all(), many=True, context=self.context).data
+
+    def get_is_match(self, obj):
+        request = self.context.get("request")
+        if not request or not getattr(request.user, "is_authenticated", False):
+            return False
+
+        viewer_id = request.user.id
+        if viewer_id == obj.id:
+            return False
+
+        low_id, high_id = sorted([viewer_id, obj.id])
+        return Match.objects.filter(user1_id=low_id, user2_id=high_id, is_active=True).exists()
 
     def to_internal_value(self, data):
         data = data.copy()
@@ -110,6 +160,14 @@ class UserProfileSerializer(serializers.ModelSerializer):
             )
 
         return attrs
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        request = self.context.get("request")
+        if request and getattr(request.user, "is_authenticated", False) and instance.id != request.user.id:
+            for field in ("email", "gender_preference", "min_preferred_age", "max_preferred_age"):
+                data.pop(field, None)
+        return data
 
 
 class AccountDeleteSerializer(serializers.Serializer):

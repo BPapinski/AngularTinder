@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 
 from .models import Match
 from .serializers import MatchSerializer
-from .services import perform_dislike, perform_like
+from .services import perform_dislike, perform_like, perform_unmatch
 
 User = get_user_model()
 
@@ -70,6 +70,23 @@ class UserMatchesView(APIView):
 
         serializer = self.serializer_class(queryset, many=True, context={"request": request})
         return Response(serializer.data)
+
+
+class UnmatchUserView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, user_id):
+        other_user = get_object_or_404(User, pk=user_id)
+
+        if other_user == request.user:
+            return Response({"error": "You cannot unmatch yourself"}, status=status.HTTP_400_BAD_REQUEST)
+
+        u1, u2 = sorted([request.user, other_user], key=lambda u: u.pk)
+        if not Match.objects.filter(user1=u1, user2=u2, is_active=True).exists():
+            return Response({"detail": "Nie jestescie para."}, status=status.HTTP_404_NOT_FOUND)
+
+        perform_unmatch(request.user, other_user)
+        return Response({"status": "unmatched"}, status=status.HTTP_200_OK)
 
 
 class ResetMatchesView(APIView):
