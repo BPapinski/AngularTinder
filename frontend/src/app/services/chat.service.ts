@@ -11,6 +11,8 @@ export class ChatService {
 
   private socket: WebSocket | null = null;
   private otherUserId: number | null = null;
+  private pendingSends: string[] = [];
+  private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
   private messageSubject = new Subject<any>();
   public messages$ = this.messageSubject.asObservable();
@@ -24,18 +26,38 @@ export class ChatService {
   }
 
   connect(otherUserId: number) {
-    this.disconnect();
+    this.clearReconnectTimer();
+    this.disconnectSocketOnly();
     this.otherUserId = otherUserId;
+    this.pendingSends = [];
 
     const token = localStorage.getItem('access_token');
     const wsUrl = `${environment.wsUrl}/ws/chat/${otherUserId}/?token=${token}`;
 
     this.socket = new WebSocket(wsUrl);
 
+    this.socket.onopen = () => {
+      this.flushPendingSends();
+    };
+
     this.socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      this.messageSubject.next(this.normalizeMessage(data));
+      this.pushIncomingMessage(data);
     };
+
+    this.socket.onclose = (event) => {
+      this.socket = null;
+      if (event.code === 4001 || this.otherUserId !== otherUserId) return;
+      this.scheduleReconnect(otherUserId);
+    };
+
+    this.socket.onerror = () => {
+      this.socket?.close();
+    };
+  }
+
+  pushIncomingMessage(msg: any) {
+    this.messageSubject.next(this.normalizeMessage(msg));
   }
 
   sendMessage(content: string) {
@@ -44,6 +66,11 @@ export class ChatService {
 
     if (this.socket?.readyState === WebSocket.OPEN) {
       this.socket.send(JSON.stringify({ content: trimmed }));
+      return;
+    }
+
+    if (this.socket?.readyState === WebSocket.CONNECTING) {
+      this.pendingSends.push(trimmed);
       return;
     }
 
@@ -58,7 +85,7 @@ export class ChatService {
         content: trimmed,
       }, { headers })
       .subscribe({
-        next: (msg) => this.messageSubject.next(this.normalizeMessage(msg)),
+        next: (msg) => this.pushIncomingMessage(msg),
         error: (err) => console.error('Failed to send message:', err),
       });
   }
@@ -93,11 +120,43 @@ export class ChatService {
   }
 
   disconnect() {
-    if (this.socket) {
-      this.socket.close();
-      this.socket = null;
-    }
+    this.clearReconnectTimer();
     this.otherUserId = null;
+    this.pendingSends = [];
+    this.disconnectSocketOnly();
+  }
+
+  private disconnectSocketOnly() {
+    if (!this.socket) return;
+
+    const socket = this.socket;
+    this.socket = null;
+    socket.onclose = null;
+    socket.onerror = null;
+    socket.close();
+  }
+
+  private flushPendingSends() {
+    while (this.pendingSends.length && this.socket?.readyState === WebSocket.OPEN) {
+      const content = this.pendingSends.shift()!;
+      this.socket.send(JSON.stringify({ content }));
+    }
+  }
+
+  private scheduleReconnect(otherUserId: number) {
+    this.clearReconnectTimer();
+    this.reconnectTimer = setTimeout(() => {
+      if (this.otherUserId === otherUserId) {
+        this.connect(otherUserId);
+      }
+    }, 3000);
+  }
+
+  private clearReconnectTimer() {
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
   }
 
   private normalizeMessage(msg: any) {

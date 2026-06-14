@@ -1,3 +1,4 @@
+from asgiref.sync import async_to_sync
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from interactions.models import Match
@@ -8,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from users.models import User
 
+from .broadcast import broadcast_chat_message
 from .models import ChatMessage, ChatMessageReaction
 from .serializers import ChatMessageSerializer, UserShortSerializer
 
@@ -105,6 +107,8 @@ class SendMessageView(APIView):
             raise PermissionDenied("No match")
 
         msg = ChatMessage.objects.create(sender=sender, receiver=receiver, content=content)
+
+        async_to_sync(broadcast_chat_message)(msg, sender, receiver.id)
 
         return Response(ChatMessageSerializer(msg, context={"request": request}).data)
 

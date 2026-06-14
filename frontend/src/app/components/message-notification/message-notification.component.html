@@ -1,0 +1,10 @@
+@if (notificationService.messagePopup(); as popup) {
+  <div class="toast" (click)="goToChat()">
+    <div class="toast-icon">💬</div>
+    <div class="toast-body">
+      <p class="toast-title">Nowa wiadomość od {{ popup.userName }}</p>
+      <p class="toast-preview">{{ preview(popup.content) }}</p>
+    </div>
+    <button class="toast-close" type="button" aria-label="Zamknij" (click)="close(); $event.stopPropagation()">×</button>
+  </div>
+}

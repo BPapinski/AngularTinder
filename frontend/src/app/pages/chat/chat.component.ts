@@ -44,9 +44,9 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.messagesSubscription = this.chatService.messages$.subscribe(msg => {
       if (!this.selectedUser) return;
 
-      const senderId = msg.sender?.id;
+      const senderId = Number(msg.sender?.id);
       const receiverId = Number(msg.receiver);
-      const selectedUserId = this.selectedUser.id;
+      const selectedUserId = Number(this.selectedUser.id);
       const isRelevant = senderId === selectedUserId || receiverId === selectedUserId;
 
       if (!isRelevant) return;

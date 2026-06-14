@@ -1,11 +1,13 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { interval, Subscription } from 'rxjs';
 import { AuthService } from './auth.service';
+import { ChatService } from './chat.service';
 import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class NotificationService {
   private auth = inject(AuthService);
+  private chat = inject(ChatService);
   private pollSub: Subscription | null = null;
   private socket: WebSocket | null = null;
   private readonly MATCHES_VISIT_KEY = 'lastMatchesVisit';
@@ -16,6 +18,7 @@ export class NotificationService {
   senderNames = signal<Record<number, string>>({});
   activeChatUserId = signal<number | null>(null);
   matchPopup = signal<{ userId: number; userName: string } | null>(null);
+  messagePopup = signal<{ userId: number; userName: string; content: string } | null>(null);
 
   showMatchPopup(userId: number, userName: string) {
     this.matchPopup.set({ userId, userName });
@@ -23,6 +26,14 @@ export class NotificationService {
 
   closeMatchPopup() {
     this.matchPopup.set(null);
+  }
+
+  showMessagePopup(userId: number, userName: string, content: string) {
+    this.messagePopup.set({ userId, userName, content });
+  }
+
+  closeMessagePopup() {
+    this.messagePopup.set(null);
   }
 
   startPolling() {
@@ -103,7 +114,20 @@ export class NotificationService {
       const data = JSON.parse(event.data);
       if (data.type === 'new_message') {
         const fromId: number = data.from_user_id;
-        if (fromId === this.activeChatUserId()) return;
+
+        if (fromId === this.activeChatUserId()) {
+          if (data.message_id) {
+            const me = this.auth.currentUser();
+            this.chat.pushIncomingMessage({
+              id: data.message_id,
+              sender: { id: fromId, first_name: data.from_user_name },
+              receiver: me?.id,
+              content: data.content ?? '',
+              created_at: data.created_at,
+            });
+          }
+          return;
+        }
 
         this.senderNames.update(names => ({ ...names, [fromId]: data.from_user_name }));
         this.unreadMessages.update(count => count + 1);
@@ -111,6 +135,7 @@ export class NotificationService {
           ...perUser,
           [fromId]: (perUser[fromId] ?? 0) + 1,
         }));
+        this.showMessagePopup(fromId, data.from_user_name, data.content ?? '');
       } else if (data.type === 'new_match') {
         this.newMatches.update(count => count + 1);
         this.showMatchPopup(data.with_user_id, data.with_user_name);
