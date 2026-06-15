@@ -1,6 +1,7 @@
 from datetime import date
 
 from django.core.management.base import BaseCommand
+from interactions.models import Match
 from interactions.services import perform_like
 
 from users.models import User
@@ -9,9 +10,14 @@ from users.models import User
 class Command(BaseCommand):
     help = "Create sample users for testing"
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--force",
+            action="store_true",
+            help="Delete and recreate sample users (resets their data)",
+        )
+
     def handle(self, *args, **options):
-        self.stdout.write("Starting create_sample_users command...")
-        # Delete existing sample users first
         sample_emails = [
             "admin@admin.com",
             "john@example.com",
@@ -21,11 +27,15 @@ class Command(BaseCommand):
             "alex@example.com",
         ]
 
-        deleted_count = User.objects.filter(email__in=sample_emails).delete()[0]
-        if deleted_count > 0:
-            self.stdout.write(self.style.WARNING(f"Deleted {deleted_count} existing sample users"))
+        if options["force"]:
+            deleted_count = User.objects.filter(email__in=sample_emails).delete()[0]
+            if deleted_count > 0:
+                self.stdout.write(self.style.WARNING(f"Deleted {deleted_count} existing sample users"))
+        elif User.objects.filter(email__in=sample_emails).exists():
+            self.stdout.write(self.style.SUCCESS("Sample users already exist, skipping seed."))
+            return
 
-        # Create sample users
+        self.stdout.write("Starting create_sample_users command...")
         users_data = [
             {
                 "email": "admin@admin.com",
@@ -94,28 +104,29 @@ class Command(BaseCommand):
         for user_data in users_data:
             user, created = User.objects.get_or_create(email=user_data["email"], defaults=user_data)
             if created:
-                # Set password based on email
                 password = "admin" if user_data["email"] == "admin@admin.com" else "password123"
                 user.set_password(password)
                 user.save()
-                self.stdout.write(self.style.SUCCESS(f"Successfully created user: {user.email}"))
+                self.stdout.write(self.style.SUCCESS(f"Created user: {user.email}"))
             else:
-                # Update existing user data
-                for key, value in user_data.items():
-                    setattr(user, key, value)
-                password = "admin" if user_data["email"] == "admin@admin.com" else "password123"
-                user.set_password(password)
-                user.save()
-                self.stdout.write(self.style.SUCCESS(f"Successfully updated user: {user.email}"))
+                self.stdout.write(f"User already exists: {user.email}")
 
         john = User.objects.get(email="john@example.com")
         anna = User.objects.get(email="anna@example.com")
         mike = User.objects.get(email="mike@example.com")
         sara = User.objects.get(email="sara@example.com")
 
-        perform_like(john, anna)
-        perform_like(anna, john)
-        perform_like(mike, sara)
-        perform_like(sara, mike)
+        self._ensure_match(john, anna)
+        self._ensure_match(mike, sara)
 
         self.stdout.write(self.style.SUCCESS("Sample users creation completed!"))
+
+    def _ensure_match(self, user_a, user_b):
+        low_id, high_id = sorted([user_a.pk, user_b.pk])
+        if Match.objects.filter(user1_id=low_id, user2_id=high_id, is_active=True).exists():
+            self.stdout.write(f"Match already exists: {user_a.email} & {user_b.email}")
+            return
+
+        perform_like(user_a, user_b)
+        perform_like(user_b, user_a)
+        self.stdout.write(self.style.SUCCESS(f"Created match: {user_a.email} & {user_b.email}"))
