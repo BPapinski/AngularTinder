@@ -128,9 +128,30 @@
   height: 44px;
 }
 
-.chat-header h3 {
+.chat-header-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  border-radius: 12px;
+  transition: background 0.15s ease;
+}
+
+.chat-header-profile:hover {
+  background: #f5f5f5;
+}
+
+.chat-header-profile h3 {
   font-size: 18px;
   font-weight: 700;
+  margin: 0;
+  color: #222;
 }
 
 .messages {

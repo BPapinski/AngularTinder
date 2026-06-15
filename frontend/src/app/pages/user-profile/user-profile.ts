@@ -2,7 +2,9 @@ import { Component, OnInit, inject, ChangeDetectorRef, ViewChild, ElementRef } f
 import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AuthService, UserProfile } from '../../services/auth.service';
+import { AuthService, UserPhoto, UserProfile } from '../../services/auth.service';
+import { ChatService } from '../../services/chat.service';
+import { DatingService } from '../../services/dating.service';
 
 @Component({
   selector: 'app-user-profile',
@@ -18,10 +20,14 @@ export class UserProfileComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  private datingService = inject(DatingService);
+  private chatService = inject(ChatService);
 
   user: UserProfile | null = null;
   loading = true;
   isOwnProfile = false;
+  isPartner = false;
+  removingMatch = false;
 
   isEditing = false;
   isSettingsOpen = false;
@@ -30,6 +36,10 @@ export class UserProfileComponent implements OnInit {
   selectedFile: File | null = null;
   previewUrl: string | null = null;
   submitting = false;
+  photoUploading = false;
+  photoActionId: number | null = null;
+  viewPhotoIndex = 0;
+  readonly maxPhotos = 9;
   deletingAccount = false;
   deleteAccountError = '';
   showDeleteConfirmModal = false;
@@ -52,19 +62,38 @@ export class UserProfileComponent implements OnInit {
   // ── Lifecycle ───────────────────────────────────────────────────────────────
   ngOnInit() {
     this.initForm();
-    const idParam = this.route.snapshot.paramMap.get('id');
 
-    if (idParam) {
-      const userId = +idParam;
-      this.checkIfOwnProfile(userId);
-      this.loadUser(userId);
-    } else {
+    this.route.paramMap.subscribe(params => {
+      const idParam = params.get('id');
+
+      if (idParam) {
+        const userId = Number(idParam);
+        this.loading = true;
+        this.isPartner = history.state?.['fromMatch'] === true;
+        this.checkIfOwnProfile(userId);
+        this.loadUser(userId);
+
+        if (!this.authService.currentUser()) {
+          this.authService.fetchCurrentUser().subscribe(() => {
+            this.checkIfOwnProfile(userId);
+            this.cdr.detectChanges();
+          });
+        }
+        return;
+      }
+
       this.isOwnProfile = true;
+      this.isPartner = false;
       this.authService.fetchCurrentUser().subscribe({
-        next: (data) => { this.user = data; this.loading = false; this.cdr.detectChanges(); },
+        next: (data) => {
+          this.user = data;
+          this.viewPhotoIndex = 0;
+          this.loading = false;
+          this.cdr.detectChanges();
+        },
         error: () => { this.loading = false; this.cdr.detectChanges(); }
       });
-    }
+    });
   }
 
   initForm() {
@@ -91,6 +120,7 @@ export class UserProfileComponent implements OnInit {
     this.isSettingsOpen = false;
     this.selectedFile = null;
     this.previewUrl = null;
+    this.viewPhotoIndex = 0;
     this.editForm.patchValue({
       first_name: this.user.first_name,
       bio: this.user.bio,
@@ -241,10 +271,9 @@ export class UserProfileComponent implements OnInit {
 
     canvas.toBlob(blob => {
       if (!blob) return;
-      this.selectedFile = new File([blob], 'profile.jpg', { type: 'image/jpeg' });
-      this.previewUrl = canvas.toDataURL('image/jpeg', 0.92);
+      const file = new File([blob], 'profile.jpg', { type: 'image/jpeg' });
       this.showCropModal = false;
-      this.cdr.detectChanges();
+      this.uploadPhotoFile(file);
     }, 'image/jpeg', 0.92);
   }
 
@@ -265,10 +294,6 @@ export class UserProfileComponent implements OnInit {
     formData.append('gender_preference', this.editForm.get('gender_preference')?.value);
     formData.append('min_preferred_age', this.editForm.get('min_preferred_age')?.value ?? '');
     formData.append('max_preferred_age', this.editForm.get('max_preferred_age')?.value ?? '');
-
-    if (this.selectedFile) {
-      formData.append('profile_image', this.selectedFile);
-    }
 
     this.authService.updateProfile(formData).subscribe({
       next: (updatedUser) => {
@@ -324,24 +349,173 @@ export class UserProfileComponent implements OnInit {
   }
 
   // ── Helpers ──────────────────────────────────────────────────────────────────
-  getPreviewOrProfileImage(): string {
-    if (this.previewUrl) return this.previewUrl;
-    return this.getProfileImageUrl();
+  get sortedPhotos(): UserPhoto[] {
+    return [...(this.user?.photos ?? [])].sort((a, b) => a.order - b.order);
+  }
+
+  get canAddMorePhotos(): boolean {
+    return this.sortedPhotos.length < this.maxPhotos;
+  }
+
+  get viewPhotos(): string[] {
+    const urls = this.sortedPhotos.map(photo => photo.image);
+    if (urls.length) return urls;
+    const fallback = this.getProfileImageUrl();
+    return fallback.includes('placeholder-user.svg') ? [] : [fallback];
+  }
+
+  uploadPhotoFile(file: File) {
+    if (!this.canAddMorePhotos) {
+      alert(`Możesz dodać maksymalnie ${this.maxPhotos} zdjęć.`);
+      return;
+    }
+
+    this.photoUploading = true;
+    this.authService.uploadPhoto(file).subscribe({
+      next: (photo) => {
+        const photos = [...this.sortedPhotos, photo].sort((a, b) => a.order - b.order);
+        this.applyPhotos(photos);
+        this.photoUploading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.photoUploading = false;
+        alert('Nie udało się dodać zdjęcia.');
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  deletePhoto(photoId: number) {
+    this.photoActionId = photoId;
+    this.authService.deletePhoto(photoId).subscribe({
+      next: () => {
+        const photos = this.sortedPhotos.filter(photo => photo.id !== photoId);
+        this.applyPhotos(photos);
+        this.viewPhotoIndex = Math.min(this.viewPhotoIndex, Math.max(photos.length - 1, 0));
+        this.photoActionId = null;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.photoActionId = null;
+        alert('Nie udało się usunąć zdjęcia.');
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  movePhotoEarlier(index: number) {
+    if (index <= 0) return;
+    this.reorderPhotosAtIndex(index, index - 1);
+  }
+
+  movePhotoLater(index: number) {
+    if (index >= this.sortedPhotos.length - 1) return;
+    this.reorderPhotosAtIndex(index, index + 1);
+  }
+
+  private reorderPhotosAtIndex(fromIndex: number, toIndex: number) {
+    const photos = [...this.sortedPhotos];
+    const [moved] = photos.splice(fromIndex, 1);
+    photos.splice(toIndex, 0, moved);
+    const photoIds = photos.map(photo => photo.id);
+
+    this.photoActionId = moved.id;
+    this.authService.reorderPhotos(photoIds).subscribe({
+      next: (updated) => {
+        this.applyPhotos(updated);
+        this.photoActionId = null;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.photoActionId = null;
+        alert('Nie udało się zmienić kolejności zdjęć.');
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  private applyPhotos(photos: UserPhoto[]) {
+    if (!this.user) return;
+    const sorted = [...photos].sort((a, b) => a.order - b.order);
+    this.user = {
+      ...this.user,
+      photos: sorted,
+      profile_image: sorted[0]?.image ?? undefined,
+    };
+    if (this.isOwnProfile) {
+      this.authService.currentUser.set(this.user);
+    }
+  }
+
+  showPreviousViewPhoto() {
+    if (!this.viewPhotos.length) return;
+    this.viewPhotoIndex = (this.viewPhotoIndex - 1 + this.viewPhotos.length) % this.viewPhotos.length;
+  }
+
+  showNextViewPhoto() {
+    if (!this.viewPhotos.length) return;
+    this.viewPhotoIndex = (this.viewPhotoIndex + 1) % this.viewPhotos.length;
   }
 
   loadUser(id: number) {
     this.authService.getUserById(id).subscribe({
-      next: (data) => { this.user = data; this.loading = false; this.cdr.detectChanges(); },
-      error: () => { this.loading = false; this.cdr.detectChanges(); }
+      next: (data) => {
+        this.user = data;
+        this.viewPhotoIndex = 0;
+        this.loading = false;
+        this.resolvePartnerStatus(id, data.is_match === true);
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.loading = false;
+        if (err?.status === 403 || err?.status === 404) {
+          this.router.navigate(['/matches']);
+          return;
+        }
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  private resolvePartnerStatus(partnerId: number, apiIsMatch: boolean) {
+    if (this.isOwnProfile) {
+      this.isPartner = false;
+      return;
+    }
+
+    if (apiIsMatch || this.isPartner) {
+      this.isPartner = true;
+      return;
+    }
+
+    this.chatService.getMatches().subscribe({
+      next: (matches) => {
+        const inChatMatches = matches.some(match => Number(match.id) === Number(partnerId));
+        if (inChatMatches) {
+          this.isPartner = true;
+          this.cdr.detectChanges();
+          return;
+        }
+
+        this.datingService.getMatches().subscribe({
+          next: (items) => {
+            this.isPartner = items.some(item => Number(item.user.id) === Number(partnerId));
+            this.cdr.detectChanges();
+          },
+        });
+      },
     });
   }
 
   checkIfOwnProfile(visitedId: number) {
     const currentUser = this.authService.currentUser();
-    this.isOwnProfile = !!(currentUser && currentUser.id === visitedId);
+    this.isOwnProfile = !!(currentUser && Number(currentUser.id) === Number(visitedId));
   }
 
   getProfileImageUrl(): string {
+    const firstPhoto = this.sortedPhotos[0]?.image;
+    if (firstPhoto) return firstPhoto;
     if (!this.user || !this.user.profile_image) return 'assets/placeholder-user.svg';
     if (this.user.profile_image.startsWith('http')) return this.user.profile_image;
     return `http://127.0.0.1:8000${this.user.profile_image}`;
@@ -397,5 +571,29 @@ export class UserProfileComponent implements OnInit {
 
   goBack() {
     this.location.back();
+  }
+
+  openChat() {
+    if (!this.user) return;
+    this.router.navigate(['/chat'], { queryParams: { userId: this.user.id } });
+  }
+
+  removeMatch() {
+    if (!this.user || this.removingMatch) return;
+    if (!confirm('Usunąć parę? Rozmowa zostanie trwale usunięta.')) return;
+
+    this.removingMatch = true;
+    this.datingService.unmatch(this.user.id).subscribe({
+      next: () => {
+        this.removingMatch = false;
+        this.isPartner = false;
+        this.router.navigate(['/matches']);
+      },
+      error: () => {
+        this.removingMatch = false;
+        alert('Nie udało się usunąć pary.');
+        this.cdr.detectChanges();
+      },
+    });
   }
 }

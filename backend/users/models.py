@@ -11,6 +11,23 @@ def user_directory_path(instance, filename):
     return f"profile_images/user_{instance.id}/{filename}"
 
 
+def user_photo_path(instance, filename):
+    return f"profile_images/user_{instance.user_id}/{filename}"
+
+
+class UserPhoto(models.Model):
+    user = models.ForeignKey("User", on_delete=models.CASCADE, related_name="photos")
+    image = models.ImageField(upload_to=user_photo_path)
+    order = models.PositiveSmallIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["order", "id"]
+
+    def __str__(self):
+        return f"Photo {self.id} for user {self.user_id}"
+
+
 class User(AbstractBaseUser, PermissionsMixin):
     class Gender(models.TextChoices):
         MALE = "M", _("Mężczyzna")

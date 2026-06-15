@@ -1,3 +1,4 @@
+from asgiref.sync import async_to_sync
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from interactions.models import Match
@@ -8,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from users.models import User
 
+from .broadcast import broadcast_chat_message, broadcast_message_reaction
 from .models import ChatMessage, ChatMessageReaction
 from .serializers import ChatMessageSerializer, UserShortSerializer
 
@@ -106,6 +108,8 @@ class SendMessageView(APIView):
 
         msg = ChatMessage.objects.create(sender=sender, receiver=receiver, content=content)
 
+        async_to_sync(broadcast_chat_message)(msg, sender, receiver.id)
+
         return Response(ChatMessageSerializer(msg, context={"request": request}).data)
 
 
@@ -128,6 +132,7 @@ class MessageReactionView(APIView):
         )
 
         message.refresh_from_db()
+        broadcast_message_reaction(message)
         return Response(ChatMessageSerializer(message, context={"request": request}).data)
 
     def delete(self, request, message_id):
@@ -135,6 +140,8 @@ class MessageReactionView(APIView):
         self._check_participant(request.user, message)
 
         ChatMessageReaction.objects.filter(message=message, user=request.user).delete()
+        message.refresh_from_db()
+        broadcast_message_reaction(message)
         return Response(ChatMessageSerializer(message, context={"request": request}).data)
 
     def _check_participant(self, user, message):

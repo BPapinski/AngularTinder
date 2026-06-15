@@ -1,15 +1,26 @@
+from django.db.models import Max
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import InvalidToken
 from rest_framework_simplejwt.views import TokenRefreshView as BaseTokenRefreshView
 
-from .models import User
-from .serializers import AccountDeleteSerializer, RegisterSerializer, UserProfileSerializer
+from .models import User, UserPhoto
+from .serializers import (
+    AccountDeleteSerializer,
+    RegisterSerializer,
+    UserPhotoReorderSerializer,
+    UserPhotoSerializer,
+    UserProfileSerializer,
+)
+from .services import can_view_user_profile, sync_user_profile_image
+
+MAX_USER_PHOTOS = 9
 
 
 class TokenRefreshView(BaseTokenRefreshView):
@@ -65,8 +76,14 @@ class UserProfileView(GenericAPIView):
             return get_object_or_404(User, id=user_id)
         return self.request.user
 
+    def ensure_can_view(self, request, user):
+        if can_view_user_profile(request.user, user):
+            return
+        raise PermissionDenied("Nie masz dostepu do tego profilu.")
+
     def get(self, request, user_id=None):
         user = self.get_object(user_id)
+        self.ensure_can_view(request, user)
         serializer = self.get_serializer(user)
         return Response(serializer.data)
 
@@ -85,8 +102,9 @@ class UserProfileView(GenericAPIView):
         serializer = self.get_serializer(user, data=request.data, partial=True)
 
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
+            user = serializer.save()
+            self._sync_legacy_profile_image_upload(user, request)
+            return Response(self.get_serializer(user).data)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -105,7 +123,96 @@ class UserProfileView(GenericAPIView):
         serializer = self.get_serializer(user, data=request.data)
 
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
+            user = serializer.save()
+            self._sync_legacy_profile_image_upload(user, request)
+            return Response(self.get_serializer(user).data)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def _sync_legacy_profile_image_upload(self, user, request):
+        uploaded = request.FILES.get("profile_image")
+        if not uploaded:
+            return
+
+        first_photo = user.photos.order_by("order", "id").first()
+        if first_photo:
+            first_photo.image = uploaded
+            first_photo.save(update_fields=["image"])
+        else:
+            UserPhoto.objects.create(user=user, image=uploaded, order=0)
+        sync_user_profile_image(user)
+
+
+class UserPhotosView(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def get(self, request, user_id=None):
+        if user_id is None:
+            user = request.user
+        else:
+            user = get_object_or_404(User, id=user_id)
+            if not can_view_user_profile(request.user, user):
+                raise PermissionDenied("Nie masz dostepu do tych zdjec.")
+
+        photos = user.photos.all()
+        serializer = UserPhotoSerializer(photos, many=True, context={"request": request})
+        return Response(serializer.data)
+
+    def post(self, request):
+        if request.user.photos.count() >= MAX_USER_PHOTOS:
+            return Response(
+                {"detail": f"Mozesz dodac maksymalnie {MAX_USER_PHOTOS} zdjec."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        image = request.FILES.get("image")
+        if not image:
+            return Response({"detail": "Brak pliku image."}, status=status.HTTP_400_BAD_REQUEST)
+
+        max_order = request.user.photos.aggregate(max_order=Max("order"))["max_order"]
+        next_order = 0 if max_order is None else max_order + 1
+        photo = UserPhoto.objects.create(user=request.user, image=image, order=next_order)
+        sync_user_profile_image(request.user)
+
+        serializer = UserPhotoSerializer(photo, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class UserPhotoDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, photo_id):
+        photo = get_object_or_404(UserPhoto, id=photo_id, user=request.user)
+        photo.image.delete(save=False)
+        photo.delete()
+        sync_user_profile_image(request.user)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class UserPhotosReorderView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        serializer = UserPhotoReorderSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        photo_ids = serializer.validated_data["photo_ids"]
+
+        photos = list(request.user.photos.filter(id__in=photo_ids))
+        if len(photos) != len(photo_ids):
+            return Response({"detail": "Nieprawidlowe identyfikatory zdjec."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if request.user.photos.count() != len(photo_ids):
+            return Response(
+                {"detail": "Lista musi zawierac wszystkie zdjecia profilu."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        photo_map = {photo.id: photo for photo in photos}
+        for index, photo_id in enumerate(photo_ids):
+            photo_map[photo_id].order = index
+        UserPhoto.objects.bulk_update(photos, ["order"])
+        sync_user_profile_image(request.user)
+
+        updated = UserPhotoSerializer(request.user.photos.all(), many=True, context={"request": request})
+        return Response(updated.data)

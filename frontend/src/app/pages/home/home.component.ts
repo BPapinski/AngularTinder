@@ -16,6 +16,7 @@ import { finalize } from 'rxjs';
 export class HomeComponent implements OnInit {
   profiles: DatingProfile[] = [];
   loading = false;
+  currentPhotoIndex = 0;
 
   startX = 0;
   translateX = 0;
@@ -54,17 +55,18 @@ export class HomeComponent implements OnInit {
 
   loadMockProfiles() {
     this.profiles = [
-      { id: 1, first_name: 'Anna', age: 24, bio: 'Kawa i podróże ☕✈️', profile_image: null },
-      { id: 2, first_name: 'Kasia', age: 27, bio: 'Frontend i UX 💻', profile_image: null },
-      { id: 3, first_name: 'Magda', age: 22, bio: 'Fotografia 📸', profile_image: null },
-      { id: 4, first_name: 'Ola', age: 26, bio: 'Sport i psy 🐕', profile_image: null },
-      { id: 5, first_name: 'Natalia', age: 29, bio: 'City breaki 🌍', profile_image: null }
+      { id: 1, first_name: 'Anna', age: 24, bio: 'Kawa i podróże ☕✈️', profile_image: null, photos: [] },
+      { id: 2, first_name: 'Kasia', age: 27, bio: 'Frontend i UX 💻', profile_image: null, photos: [] },
+      { id: 3, first_name: 'Magda', age: 22, bio: 'Fotografia 📸', profile_image: null, photos: [] },
+      { id: 4, first_name: 'Ola', age: 26, bio: 'Sport i psy 🐕', profile_image: null, photos: [] },
+      { id: 5, first_name: 'Natalia', age: 29, bio: 'City breaki 🌍', profile_image: null, photos: [] }
     ] as DatingProfile[];
   }
 
   loadFeed() {
   this.loading = true;
   this.profiles = [];
+  this.currentPhotoIndex = 0;
 
   this.datingService.getFeed()
     .pipe(
@@ -78,7 +80,14 @@ export class HomeComponent implements OnInit {
         console.log('FEED RESPONSE', profiles);
 
         if (Array.isArray(profiles)) {
-            this.profiles = profiles;
+            this.profiles = profiles.map((profile: DatingProfile) => ({
+              ...profile,
+              photos: profile.photos?.length
+                ? profile.photos
+                : profile.profile_image
+                  ? [profile.profile_image]
+                  : [],
+            }));
           } else {
             this.profiles = [];
           }
@@ -96,6 +105,7 @@ export class HomeComponent implements OnInit {
 }
 
   onPointerDown(event: PointerEvent) {
+    if ((event.target as HTMLElement).closest('.photo-nav, .photo-dots')) return;
     this.isDragging = true;
     this.startX = event.clientX;
   }
@@ -175,6 +185,36 @@ export class HomeComponent implements OnInit {
 
   private removeFirstProfile() {
     this.profiles.shift();
+    this.currentPhotoIndex = 0;
     this.resetCard();
+  }
+
+  getCurrentPhotos(profile: DatingProfile | undefined): string[] {
+    if (!profile) return [];
+    if (profile.photos?.length) return profile.photos;
+    return profile.profile_image ? [profile.profile_image] : [];
+  }
+
+  get activePhotos(): string[] {
+    return this.getCurrentPhotos(this.profiles[0]);
+  }
+
+  showPreviousPhoto(event: Event) {
+    event.stopPropagation();
+    const photos = this.activePhotos;
+    if (!photos.length) return;
+    this.currentPhotoIndex = (this.currentPhotoIndex - 1 + photos.length) % photos.length;
+  }
+
+  showNextPhoto(event: Event) {
+    event.stopPropagation();
+    const photos = this.activePhotos;
+    if (!photos.length) return;
+    this.currentPhotoIndex = (this.currentPhotoIndex + 1) % photos.length;
+  }
+
+  goToPhoto(index: number, event: Event) {
+    event.stopPropagation();
+    this.currentPhotoIndex = index;
   }
 }

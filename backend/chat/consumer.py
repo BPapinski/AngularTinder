@@ -4,6 +4,8 @@ import traceback
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 
+from .broadcast import broadcast_chat_message
+
 
 class NotificationConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -27,6 +29,9 @@ class NotificationConsumer(AsyncWebsocketConsumer):
                     "type": "new_message",
                     "from_user_id": event["from_user_id"],
                     "from_user_name": event["from_user_name"],
+                    "content": event.get("content", ""),
+                    "message_id": event.get("message_id"),
+                    "created_at": event.get("created_at"),
                 }
             )
         )
@@ -69,7 +74,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.close()
 
     async def disconnect(self, close_code):
-        await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
+        if hasattr(self, "room_group_name"):
+            await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
     async def receive(self, text_data):
         try:
@@ -80,32 +86,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             msg = await self.create_message(self.user.id, self.other_id, content)
             print(f"DEBUG: Wiadomość zapisana w DB, ID: {msg.id}")
 
-            await self.channel_layer.group_send(
-                self.room_group_name,
-                {
-                    "type": "chat_message",
-                    "message": {
-                        "id": msg.id,
-                        "sender": {
-                            "id": self.user.id,
-                            "first_name": self.user.first_name,
-                        },
-                        "receiver": self.other_id,
-                        "content": msg.content,
-                        "created_at": msg.created_at.isoformat(),
-                    },
-                },
-            )
+            await broadcast_chat_message(msg, self.user, int(self.other_id))
             print(f"DEBUG: Wiadomość rozesłana do grupy: {self.room_group_name}")
-
-            await self.channel_layer.group_send(
-                f"notifications_{self.other_id}",
-                {
-                    "type": "new_message_notification",
-                    "from_user_id": self.user.id,
-                    "from_user_name": self.user.first_name,
-                },
-            )
         except Exception as e:
             print(f"ERROR IN RECEIVE: {e}")
             traceback.print_exc()
@@ -113,6 +95,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def chat_message(self, event):
         print(f"DEBUG CHAT_MESSAGE: Wysyłam wiadomość dla kanału {self.channel_name}: {event['message']}")
         await self.send(text_data=json.dumps(event["message"]))
+
+    async def chat_reaction(self, event):
+        await self.send(text_data=json.dumps(event["payload"]))
 
     @database_sync_to_async
     def check_match(self, u1, u2):

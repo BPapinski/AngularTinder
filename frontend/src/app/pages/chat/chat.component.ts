@@ -4,7 +4,7 @@ import { ChatService } from '../../services/chat.service';
 import { FormsModule } from '@angular/forms';
 import { Subscription, Observable } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { NotificationService } from '../../services/notification.service';
 
@@ -35,6 +35,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     private authService: AuthService,
     private route: ActivatedRoute,
+    private router: Router,
     protected notificationService: NotificationService,
   ) {}
 
@@ -44,9 +45,14 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.messagesSubscription = this.chatService.messages$.subscribe(msg => {
       if (!this.selectedUser) return;
 
-      const senderId = msg.sender?.id;
+      if (msg._event === 'reaction') {
+        this.applyReactionUpdate(msg);
+        return;
+      }
+
+      const senderId = Number(msg.sender?.id);
       const receiverId = Number(msg.receiver);
-      const selectedUserId = this.selectedUser.id;
+      const selectedUserId = Number(this.selectedUser.id);
       const isRelevant = senderId === selectedUserId || receiverId === selectedUserId;
 
       if (!isRelevant) return;
@@ -85,6 +91,13 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.notificationService.activeChatUserId.set(null);
     this.selectedUser = null;
     this.messages = [];
+  }
+
+  openPartnerProfile() {
+    if (!this.selectedUser) return;
+    this.router.navigate(['/profile', this.selectedUser.id], {
+      state: { fromMatch: true },
+    });
   }
 
   selectUser(user: any) {
@@ -174,6 +187,21 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.messages[index] = {
       ...this.messages[index],
       ...updatedMessage,
+    };
+    this.cdr.detectChanges();
+  }
+
+  private applyReactionUpdate(update: any) {
+    const index = this.messages.findIndex(message => message.id === update.id);
+    if (index === -1) return;
+
+    const me = this.authService.currentUser();
+    const myReaction = update.reactions?.find((item: any) => Number(item.user_id) === Number(me?.id))?.reaction ?? null;
+
+    this.messages[index] = {
+      ...this.messages[index],
+      reactions: update.reactions || [],
+      my_reaction: myReaction,
     };
     this.cdr.detectChanges();
   }

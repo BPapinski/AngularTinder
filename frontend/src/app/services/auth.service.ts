@@ -16,6 +16,13 @@ export interface LoginResponse {
 }
 
 
+export interface UserPhoto {
+  id: number;
+  order: number;
+  image: string;
+  created_at?: string;
+}
+
 export interface UserProfile {
   id: number;
   email: string;
@@ -28,6 +35,8 @@ export interface UserProfile {
   age?: number;
   bio?: string;
   profile_image?: string;
+  photos?: UserPhoto[];
+  is_match?: boolean;
   created_at?: string;
 }
 
@@ -168,6 +177,38 @@ export class AuthService {
         this.currentUser.set(updatedUser);
       })
     );
+  }
+
+  uploadPhoto(file: File): Observable<UserPhoto> {
+    const formData = new FormData();
+    formData.append('image', file);
+    const url = `${this.baseUrl}/users/me/photos/`;
+    const token = localStorage.getItem('access_token');
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return this.http.post<UserPhoto>(url, formData, { headers });
+  }
+
+  deletePhoto(photoId: number): Observable<void> {
+    const url = `${this.baseUrl}/users/me/photos/${photoId}/`;
+    const token = localStorage.getItem('access_token');
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return this.http.delete<void>(url, { headers });
+  }
+
+  reorderPhotos(photoIds: number[]): Observable<UserPhoto[]> {
+    const url = `${this.baseUrl}/users/me/photos/reorder/`;
+    const token = localStorage.getItem('access_token');
+    let headers = new HttpHeaders().set('Content-Type', 'application/json');
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return this.http.put<UserPhoto[]>(url, { photo_ids: photoIds }, { headers });
   }
 
   deleteAccount(credentials: { email: string; password: string }): Observable<{ detail: string }> {

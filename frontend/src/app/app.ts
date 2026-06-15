@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { HeaderComponent } from './pages/header/header.component';
 import { MatchPopupComponent } from './components/match-popup/match-popup.component';
+import { MessageNotificationComponent } from './components/message-notification/message-notification.component';
 import { filter } from 'rxjs/operators';
 
 const AUTH_ROUTES = new Set(['/login', '/register']);
@@ -9,13 +10,14 @@ const AUTH_ROUTES = new Set(['/login', '/register']);
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, HeaderComponent, MatchPopupComponent],
+  imports: [RouterOutlet, HeaderComponent, MatchPopupComponent, MessageNotificationComponent],
   template: `
     @if (showHeader()) {
       <app-header></app-header>
     }
     <router-outlet></router-outlet>
     <app-match-popup></app-match-popup>
+    <app-message-notification></app-message-notification>
   `,
   styleUrl: './app.css'
 })
