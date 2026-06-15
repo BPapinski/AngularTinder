@@ -42,6 +42,10 @@ export class ChatService {
 
     this.socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
+      if (data.type === 'message_reaction') {
+        this.pushReactionUpdate(data);
+        return;
+      }
       this.pushIncomingMessage(data);
     };
 
@@ -57,7 +61,11 @@ export class ChatService {
   }
 
   pushIncomingMessage(msg: any) {
-    this.messageSubject.next(this.normalizeMessage(msg));
+    this.messageSubject.next({ ...this.normalizeMessage(msg), _event: 'message' });
+  }
+
+  pushReactionUpdate(update: any) {
+    this.messageSubject.next({ ...update, _event: 'reaction' });
   }
 
   sendMessage(content: string) {

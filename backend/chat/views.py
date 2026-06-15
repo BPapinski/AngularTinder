@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from users.models import User
 
-from .broadcast import broadcast_chat_message
+from .broadcast import broadcast_chat_message, broadcast_message_reaction
 from .models import ChatMessage, ChatMessageReaction
 from .serializers import ChatMessageSerializer, UserShortSerializer
 
@@ -132,6 +132,7 @@ class MessageReactionView(APIView):
         )
 
         message.refresh_from_db()
+        broadcast_message_reaction(message)
         return Response(ChatMessageSerializer(message, context={"request": request}).data)
 
     def delete(self, request, message_id):
@@ -139,6 +140,8 @@ class MessageReactionView(APIView):
         self._check_participant(request.user, message)
 
         ChatMessageReaction.objects.filter(message=message, user=request.user).delete()
+        message.refresh_from_db()
+        broadcast_message_reaction(message)
         return Response(ChatMessageSerializer(message, context={"request": request}).data)
 
     def _check_participant(self, user, message):

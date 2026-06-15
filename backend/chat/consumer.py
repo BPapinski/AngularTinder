@@ -96,6 +96,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
         print(f"DEBUG CHAT_MESSAGE: Wysyłam wiadomość dla kanału {self.channel_name}: {event['message']}")
         await self.send(text_data=json.dumps(event["message"]))
 
+    async def chat_reaction(self, event):
+        await self.send(text_data=json.dumps(event["payload"]))
+
     @database_sync_to_async
     def check_match(self, u1, u2):
         from django.db.models import Q

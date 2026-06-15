@@ -45,6 +45,11 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.messagesSubscription = this.chatService.messages$.subscribe(msg => {
       if (!this.selectedUser) return;
 
+      if (msg._event === 'reaction') {
+        this.applyReactionUpdate(msg);
+        return;
+      }
+
       const senderId = Number(msg.sender?.id);
       const receiverId = Number(msg.receiver);
       const selectedUserId = Number(this.selectedUser.id);
@@ -182,6 +187,21 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.messages[index] = {
       ...this.messages[index],
       ...updatedMessage,
+    };
+    this.cdr.detectChanges();
+  }
+
+  private applyReactionUpdate(update: any) {
+    const index = this.messages.findIndex(message => message.id === update.id);
+    if (index === -1) return;
+
+    const me = this.authService.currentUser();
+    const myReaction = update.reactions?.find((item: any) => Number(item.user_id) === Number(me?.id))?.reaction ?? null;
+
+    this.messages[index] = {
+      ...this.messages[index],
+      reactions: update.reactions || [],
+      my_reaction: myReaction,
     };
     this.cdr.detectChanges();
   }
