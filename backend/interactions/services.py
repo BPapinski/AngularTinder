@@ -42,9 +42,7 @@ def perform_unmatch(user, other_user):
     Interaction.objects.filter(user=user, target_user=other_user).delete()
     Interaction.objects.filter(user=other_user, target_user=user).delete()
 
-    ChatMessage.objects.filter(
-        Q(sender=user, receiver=other_user) | Q(sender=other_user, receiver=user)
-    ).delete()
+    ChatMessage.objects.filter(Q(sender=user, receiver=other_user) | Q(sender=other_user, receiver=user)).delete()
 
 
 def get_dating_feed(user):
